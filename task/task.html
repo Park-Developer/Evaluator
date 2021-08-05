@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+
+<html lang="kr">
+
+<head>
+    <link rel="stylesheet" href="../styles.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluator</title>
+</head>
+
+<body>
+    <!--Status Bar-->
+    <div class="status-bar">
+        <div class="status-bar__User">
+            <span>Evaluator</span>
+            <button class="home_Retry_Btn"><i class="fas fa-home"></i></button>
+        </div>
+
+        <div class="status-bar__Clock">
+            <span class="status-bar__Clock_Date"></span>
+            <span class="status-bar__Clock_Time"></span>
+        </div>
+    </div>
+    <!--Status Bar End-->
+
+    <!--Main Home DashBoard-->
+
+    <!--Main Home DashBoard End-->
+    <!--Main Frame-->
+    <div class="Main_Frame">
+
+        <!--Task Table-->
+        <div class="Task">
+
+            <div class="Task_Selector">
+                <select class="Task_Selector__selection">
+              
+                </select>
+                <span class="Task_Title"></span>
+                <span>Due Date</span>
+            </div>
+            <!--"Task Selector End-->
+
+            <div class="Task_Table">
+                <table class="Task_Table__table">
+                    <tr class="Task_Table__header">
+                        <th class="Task_Table__tasklist">Task</th>
+                        <th class="Task_Table__expectedtime">Expected Time</th>
+                        <th class="Task_Table__performance">Performance</th>
+
+                        <th class="Task_Table__remaining">Remaining</th>
+                        <th class="Task_Table__date">Date</th>
+                        <th class="Task_Table__btn">⭕</th>
+                    </tr>
+                    <tr class="Task_Table__summary">
+                        <th class="Task_Table__tasklist_Sum">0</th>
+                        <th class="Task_Table__expectedtime_Sum">0</th>
+                        <th class="Task_Table__performance_Sum">0</th>
+
+                        <th class="Task_Table__remaining_Sum">0</th>
+                        <th class="Task_Table__date_Sum">0</th>
+                        <th class="Task_Table__btn_Sum">0</th>
+                    </tr>
+                </table>
+
+                <div class="Task_Table__Btn">
+                    <button class="Task_Btn__Add">Add</button>
+                    <button class="Task_Btn_Remove">Remove</button>
+                    <button class="Test">test</button>
+                </div>
+            </div>
+            <!--Task Table End-->
+        </div>
+        <!--Task End-->
+
+        <div class="Summary">
+            <span class="Summary_Title">Summary</span>
+            <div class="Summary_statistics">
+                <div class=Summary_statistics__ratio>
+                    <span class="progress_ratio">🟦 Progess Ratio</span>
+
+                    <div class="performance_ratio__detail">
+                        <span class="performance_ratio__title">◻ Performance</span>
+                        <span class="performance_ratio__value"></span>
+                    </div>
+
+                    <div class="remaining_ratio__detail">
+                        <span class="remaining_ratio__title">◻ Remaining</span>
+                        <span class="remaining_ratio__value"></span>
+                    </div>
+                </div>
+                <!--Summary_statistics__ratio END-->
+
+                <div class=Summary_statistics__amount>
+                    <span class="progress_amount">🟦 Progess Amount</span>
+
+                    <div class="performance_amount__detail">
+                        <span class="performance_amount__title">◻ Performance</span>
+                        <span class="performance_amount__value"></span>
+                    </div>
+
+                    <div class="remaining_amount__detail">
+                        <span class="remaining_amount__title">◻ Remaining</span>
+                        <span class="remaining_amount__value"></span>
+                    </div>
+
+
+                </div>
+                <!--Summary_statistics__amount END-->
+
+            </div> <!-- <div class="Summary_statistics END>-->
+
+            <div class="today_history">
+                <span class="today_history__title">🟦 Today History</span>
+                <div class="today_statistics">
+                    <span class="today_worktime__title">◻ Today Work Time : </span>
+                    <span class="today_worktime__value"></span>
+                </div>
+                <div class="today_chart">
+                    <span class="today_chart__title">◻ Today Work Chart</span>
+                    <canvas class="today_chart__bar_chart" width="300" height="230"></canvas>
+                </div>
+            </div>
+
+            <div class="Summary_chart">
+
+            </div>
+        </div>
+        <!--Summary End-->
+    </div>
+    <!--Main Frame End-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/3dbd9a16b0.js" crossorigin="anonymous"></script>
+
+    <script src="./task2.js"></script>
+
+    <script src="../status-bar/clock.js"></script>
+</body>
+
+</html>

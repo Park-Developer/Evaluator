@@ -1,0 +1,33 @@
+.status-bar{
+    position : fixed;
+    top:0px;
+
+    display:flex;
+    justify-content: space-between;
+    width:100%;
+    align-items: center;
+    padding : 5px 3px;
+    background-color: var(--status_color);
+
+}
+
+.status-bar__User
+{color : var(--titlecolor);}
+
+
+
+.status-bar__Clock{
+    margin-right: 30px;
+}
+
+.status-bar__Clock_Date
+{
+    margin-right: 3px;
+    color : var(--titlecolor);
+}
+
+.status-bar__Clock_Time
+{
+    color : var(--titlecolor);
+}
+

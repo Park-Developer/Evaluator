@@ -1,0 +1,22 @@
+:root {
+    --yellow: #fae100;
+    --background_color : #1f2124;
+    --status_color : rgb(109, 109, 218);
+    --titlecolor: whitesmoke;
+    --info_indent: 13px;
+    --main_frame_top_margin:40px;
+    --component-Status_top_margin:30px;
+    --component_Title_top_margin:10px;
+
+    /* Memo Variable */
+    --deactivated_Btn_Color: gray;
+    
+
+    /* Schedule Variable */
+    --past_Color: gray;
+
+
+    /* MD Variable */
+    --md_frame_outline:5px solid blue;
+    --md_frame_background:#FFFFE0;
+}

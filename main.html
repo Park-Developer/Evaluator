@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+
+<html lang="kr">
+
+<head>
+  <link rel="stylesheet" href="./styles.css">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluator</title>
+</head>
+
+<body>
+  <!--Status Bar-->
+  <div class="status-bar">
+    <div class="status-bar__User">
+      <span>Evaluator</span>
+
+      <button class="home_Btn"><i class="fas fa-home"></i></button>
+    </div>
+
+    <div class="status-bar__Clock">
+      <span class="status-bar__Clock_Date"></span>
+      <span class="status-bar__Clock_Time"></span>
+    </div>
+  </div>
+  <!--Status Bar End-->
+
+
+  <div class="Main">
+    <!--Main-->
+    <div class="home_dashboard">
+      <!--Main Home DashBoard-->
+      <table class="home_dashboard__table">
+        <tr class="home_dashboard__header">
+          <th rowspan="2" class="home_dashboard__tasklist">Task</th>
+          <th rowspan="2" class="home_dashboard__duedate">Due Date</th>
+          <th rowspan="2" class="home_dashboard__remainday">Remain Day</th>
+          <th rowspan="2" class="home_dashboard__progress">Progress</th>
+          <th colspan="2" class="home_dashboard__remaintime1">Remain Time</th>
+        </tr>
+        <tr class="home_dashboard__header__2ndrow">
+          <th class="home_dashboard__remaintime1__2ndrow">Total</th>
+          <th class="home_dashboard__remaintime2__2ndrow">Per Day</th>
+        </tr>
+      </table>
+
+      <div class="Task_Table__Btn">
+        <button class="Task_Btn__Add">Add</button>
+        <button class="Task_Btn_Remove">Remove</button>
+        <button class="Test">test</button>
+      </div>
+    </div>
+    <!--Task Table End-->
+
+    <!--Main Home DashBoard End-->
+
+    <div class="home_schedule">
+      <span>Monthly Schedule</span>
+      <table class="home_schedule__table">
+      </table>
+    </div>
+    <!--home_schedule End-->
+  </div>
+  <!--Main end-->
+
+  <script src="https://kit.fontawesome.com/3dbd9a16b0.js" crossorigin="anonymous"></script>
+  <script src="./main.js"></script>
+
+
+  <script src="status-bar/clock.js"></script>
+</body>
+
+</html>

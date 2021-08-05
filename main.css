@@ -1,0 +1,15 @@
+.Main{
+    color:white;
+    margin:30px;
+    display:flex;
+}
+.home_dashboard__table{
+    border : 1px solid;
+}
+.home_dashboard{
+    color:white;
+}
+.home_schedule{
+    color:white;
+
+}

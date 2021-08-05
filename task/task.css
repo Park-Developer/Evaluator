@@ -1,0 +1,21 @@
+.Task{
+    margin: 30px;
+    color : white;
+}
+.Task_Table__Btn{
+    margin: 30px;
+}
+
+.Task_Table__table{
+    table-layout: fixed;
+}
+.Task_Table__header{
+    background-color: aquamarine;
+}
+.Summary_statistics{
+    display: flex;
+}
+
+.Task_Table__summary{
+background-color: gray;
+}
