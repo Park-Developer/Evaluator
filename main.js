@@ -305,6 +305,7 @@ class Dashboard {
                     }
                     */
                 ], // 항목별 정보
+                total_taskNum: 0,
                 expectedSum: 0,
                 performanceSum: 0,
                 remainingSum: 0,

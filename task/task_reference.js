@@ -151,8 +151,8 @@ class Task_Table_UI {
 
 
         // Chart
-        this.CHART_BACKGROUND_LIST = ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"];
-        this.work_chart = new Chart(document.querySelector(".today_chart__bar_chart"), {
+        this.CHART_BACKGROUND_LIST = ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"]; //mig ok
+        this.work_chart = new Chart(document.querySelector(".today_chart__bar_chart"), {//mig ok
             type: 'bar',
             data: {
                 labels: [],
