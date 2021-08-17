@@ -180,17 +180,22 @@ class Dashboard {
     constructor() {
         // User Defined Parameter
         this.MAX_TASK_NUMBER = 10;
-
-
+        const DASH_BOARD = this;
+        const Dash_TABLE_INDEX = {
+            "Task Name": 0,
+            "Due Date": 1,
+        }
         this.Home_TaskLists; // Home Task Lists;
 
         this.localstoraged_taskinfo = "HOME_TASK_INFO";
         this.taskObject_list = []; // task object들의 모음 => 삭제 해야함
-        this.home_dashboard__table_DOM = document.querySelector(".home_dashboard__table");
 
+
+        // DOM Setting
+        this.home_dashboard__table_DOM = document.querySelector(".home_dashboard__table");
         this.dashTable_AddBtn_DOM = document.querySelector(".Task_Btn__Add");
         this.dashTable_RemoveBtn_DOM = document.querySelector(".Task_Btn_Remove");
-
+        this.home_schedule__table = document.querySelector(".home_schedule__table");
 
 
         // Column Index Setting
@@ -200,54 +205,181 @@ class Dashboard {
         // Button Event Setting
         this.dashTable_AddBtn_DOM.addEventListener("click", () => {
             this.add_dashTable_row();
+            DASH_BOARD.updater.update_dashboardInfo();
         });
         this.dashTable_RemoveBtn_DOM.addEventListener("click", () => {
             this.remove_dashTable_row();
         });
 
-    }
-    set_row_property(row, editable, text_align) {
-        let cell_number = row.cells.length;
-        for (let i = 0; i < cell_number; i++) {
-            row.cells[i].setAttribute("contenteditable", editable);
-            row.cells[i].style.textAlign = text_align;
-        }
-    }
+        this.dash_tool = {
+            set_row_property: function (row, editable, text_align) {
+                let cell_number = row.cells.length;
+                for (let i = 0; i < cell_number; i++) {
+                    row.cells[i].setAttribute("contenteditable", editable);
+                    row.cells[i].style.textAlign = text_align;
+                }
+            },
 
-    load_localstorage_to_Home() {
-        const stored_home_table = localStorage.getItem(this.localstoraged_taskinfo);
-        this.Home_TaskLists = JSON.parse(stored_home_table);
+            find_task: function (task_name) {
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let result = {
+                    is_find: false,
+                    task_loc: -1,
+                }
+                if (Home_TaskLists !== null) {
+                    for (let i = 0; i < Home_TaskLists.length; i++) {
+                        if (task_name === Home_TaskLists[i].dash_boardInfo.task_name) {
+                            result.is_find = true;
+                            result.task_loc = i;
+                            break;
+                        }
+                    }
+                }
 
-        let home_data_num = this.Home_TaskLists.length;
+                return result;
+            },
 
-
-        if (this.Home_TaskLists !== null) {
-            for (let idx = 0; idx < home_data_num; idx++) {
-                const newRow = this.home_dashboard__table_DOM.insertRow(this.home_dashboard__table_DOM.rows.length);
-
-                const newCell0 = newRow.insertCell(0); // 'task';
-                newCell0.innerText = this.Home_TaskLists[idx].dash_boardInfo.task_name;
-                const newCell1 = newRow.insertCell(1); // "due date";
-                newCell1.innerText = this.Home_TaskLists[idx].dash_boardInfo.due_date;
-                const newCell2 = newRow.insertCell(2); // "remain date"
-                newCell2.innerText = this.Home_TaskLists[idx].dash_boardInfo.remain_day;
-                const newCell3 = newRow.insertCell(3); // progress
-                newCell3.innerText = this.Home_TaskLists[idx].dash_boardInfo.progress;
-                const newCell4 = newRow.insertCell(4); // remain total
-                newCell4.innerText = this.Home_TaskLists[idx].dash_boardInfo.remain_total;
-                const newCell5 = newRow.insertCell(5); // remain perday
-                newCell5.innerText = this.Home_TaskLists[idx].dash_boardInfo.remain_perday;
-
-                // table 수정 가능 속성
-                this.set_row_property(newRow, true, "center");
+            get_taskObj(task_name) {
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let find_Result = this.find_task(task_name);
+                if (find_Result.is_find === true) {
+                    return Home_TaskLists[find_Result.task_loc];
+                } else {
+                    alert("gettaskobj error!");
+                    return undefined;
+                }
             }
         }
+        this.loader = {
+            load_localstorage_to_Home: function () {
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let home_data_num = Home_TaskLists.length;
 
-    }
-    //임마가 문제네 ㅋ?
+                if (Home_TaskLists !== null) {
+                    for (let idx = 0; idx < home_data_num; idx++) {
+                        const newRow = DASH_BOARD.home_dashboard__table_DOM.insertRow(DASH_BOARD.home_dashboard__table_DOM.rows.length);
+
+                        const newCell0 = newRow.insertCell(0); // 'task';
+                        newCell0.innerText = Home_TaskLists[idx].dash_boardInfo.task_name;
+                        const newCell1 = newRow.insertCell(1); // "due date";
+                        newCell1.innerText = Home_TaskLists[idx].dash_boardInfo.due_date;
+                        const newCell2 = newRow.insertCell(2); // "remain date"
+                        newCell2.innerText = Home_TaskLists[idx].dash_boardInfo.remain_day;
+                        const newCell3 = newRow.insertCell(3); // progress
+                        newCell3.innerText = Home_TaskLists[idx].dash_boardInfo.progress;
+                        const newCell4 = newRow.insertCell(4); // remain total
+                        newCell4.innerText = Home_TaskLists[idx].dash_boardInfo.remain_total;
+                        const newCell5 = newRow.insertCell(5); // remain perday
+                        newCell5.innerText = Home_TaskLists[idx].dash_boardInfo.remain_perday;
+
+                        // table 수정 가능 속성
+                        DASH_BOARD.dash_tool.set_row_property(newRow, true, "center");
+                    }
+                }
+            },
+        }
+        this.updater = {
+            update_homeTasklist: function (updated_homeTask) {
+                localStorage.setItem(DASH_BOARD.localstoraged_taskinfo, JSON.stringify(updated_homeTask));
+            },
+
+            update_dashboardInfo: function () { // UI -> Local Storage
+                /*
+                수정가능 목록 : Task name, Due Date 
+                */
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let task_numbers = Home_TaskLists.length;
+                let task_idx = Dash_TABLE_INDEX["Task Name"];
+                let duedate_idx = Dash_TABLE_INDEX["Due Date"];
+                for (let i = 0; i < task_numbers; i++) {
+                    if (i >= 1) { // header 제외
+                        let table_Taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[task_idx].innerText;
+                        let table_Duedate = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[duedate_idx].innerText;
+
+                        let taskFind_result = DASH_BOARD.dash_tool.find_task(table_Taskname);
+                        if (taskFind_result.is_find === true) {
+                            // [1] task_name update
+                            Home_TaskLists[taskFind_result.task_loc].dash_boardInfo.task_name = table_Taskname;
+                            // [2] due_date update
+                            Home_TaskLists[taskFind_result.task_loc].dash_boardInfo.due_date = table_Duedate;
+                        }
+                    }
+
+                }
+                this.update_homeTasklist(Home_TaskLists);// update to local storage
+
+            }
+        }
+        this.Schedule = {
+            get_thisMonth_info: function () {
+                let date_info = new Date();
+
+                let this_month = date_info.getMonth() + 1;
+                let this_year = date_info.getFullYear();
+
+                let daysInMonth = new Date(this_year, this_month, 0).getDate();
+                let result = {
+                    month: this_month,
+                    year: this_year,
+                    daysInMonth: daysInMonth,
+                }
+                return result;
+
+            },
+            make_schedule_table: function () {
+                function make_header(month, daysin_month) {    // Table Header Setting
+                    let header_tr = document.createElement('tr');
+                    let header_td = document.createElement('td');
+                    header_tr.appendChild(header_td);
+                    header_td.innerText = String(month) + "月";
+                    header_td.colSpan = String(daysin_month + 1);
+                    header_td.style.textAlign = "center";
+
+                    return header_tr;
+                }
+
+                let month_info = this.get_thisMonth_info();
+                let header_tr = make_header(month_info.month, month_info.daysInMonth);
+
+                DASH_BOARD.home_schedule__table.appendChild(header_tr);
+                let Hometask_lists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let Task_numbers = Hometask_lists.length;
+                for (let row_idx = 0; row_idx < Task_numbers + 1; row_idx++) {
+                    //[1] Row Setting
+                    let tr = document.createElement('tr');
+                    tr.classList.add("scedule_row_" + String(row_idx));
+
+                    //[2] Column Setting
+                    for (let col_idx = 0; col_idx < month_info.daysInMonth + 1; col_idx++) {
+                        if (row_idx === 0) { //header행인 경우
+                            let td = document.createElement('td');
+                            if (col_idx === 0) {
+                                td.innerText = "Task";
+                            } else {
+                                td.innerText = String(col_idx) + "일";
+                            }
+                            tr.appendChild(td);
+                        } else { // header행이 아닌경우
+                            let td = document.createElement('td');
+                            if (col_idx === 0) {
+                                td.innerText = Hometask_lists[row_idx - 1].dash_boardInfo.task_name;
+                            } else {
+                                td.innerText = ".";
+                            }
+                            tr.appendChild(td);
+                        }
+                    }
+
+                    //[3] Add row
+                    DASH_BOARD.home_schedule__table.appendChild(tr);
+                }
+            }
+        }
+    }// constructor
+
+
 
     add_hometask_toLocalstorage() {
-
 
         //localStorage.setItem(this.localstoraged_taskinfo, JSON.stringify([]));
 
@@ -297,7 +429,7 @@ class Dashboard {
                                     start_date: String,
                                     recorded_time: Integer,
                                     },
-
+     
                                 try2:{
                                     }
                             },
@@ -351,23 +483,25 @@ class Dashboard {
         //this.MAX_TASK_NUMBER = 10;
         let tasknumber = this.home_dashboard__table_DOM.rows.length - 2;
         if (tasknumber < this.MAX_TASK_NUMBER) {
+
+
             const newRow = this.home_dashboard__table_DOM.insertRow(this.home_dashboard__table_DOM.rows.length);
 
             const newCell0 = newRow.insertCell(0);
             newCell0.innerText = 'task' + String(this.home_dashboard__table_DOM.rows.length - 2);
             const newCell1 = newRow.insertCell(1);
-            newCell1.innerText = "due date";
+            newCell1.innerText = "";
             const newCell2 = newRow.insertCell(2);
-            newCell2.innerText = "remain date";
+            newCell2.innerText = 0;
             const newCell3 = newRow.insertCell(3);
-            newCell3.innerText = "progress date";
+            newCell3.innerText = 0;
 
             const newCell4 = newRow.insertCell(4);
-            let today = new Date();
-            newCell4.innerText = today.toLocaleDateString();
+
+            newCell4.innerText = 0;
 
             const newCell5 = newRow.insertCell(5);
-            newCell5.innerText = "perdat";
+            newCell5.innerText = 0;
 
             //origin
             //this.update_Home_to_localstorage();
@@ -476,8 +610,9 @@ function init() {
     const home = new Home();
 
     const dashboard = new Dashboard();
-    dashboard.load_localstorage_to_Home();
-
+    dashboard.loader.load_localstorage_to_Home();
+    dashboard.updater.update_dashboardInfo();
+    dashboard.Schedule.make_schedule_table();
     let home_TestBtn_DOM = document.querySelector(".Test");
     home_TestBtn_DOM.addEventListener("click", () => {
         TEST();
@@ -490,18 +625,3 @@ function init() {
 
 init();
 
-/*
-dashboard에서 정의해야할 함수 -> Event 함수로 만들기
-  select_task(taskCls_list) {
-        for (let idx = 0; idx < taskCls_list.length; idx++) {
-            if (taskCls_list[idx].is_activate == true) {
-                this.task_name = taskCls_list[idx].task_name;
-                this.local_storage_name = taskCls_list[idx].task_local_storage;
-                this.due_date = taskCls_list[idx].due_date;
-                break;
-            }
-
-        }
-
-    }
- */

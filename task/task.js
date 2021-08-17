@@ -63,11 +63,29 @@ class Task {
 
 
         this.home = {
-            this_class: CLASS_Obj,
+            //Home Dashboard update lists
+            get_all_tasklists: function () {
+                let home_tasklist = JSON.parse(localStorage.getItem(home_Storage));
+
+            },
+            get_updated_remainDay: function (task_name) {
+                let updated_remainDay;
+            },
+            get_updated_progress: function (task_name) {
+                let updated_progress;
+            },
+            get_updated_remainTotal: function (task_name) {
+                let updated_remainTotal;
+            },
+            get_updated_timerPerDay: function (task_name) {
+                let updated_timerPerDay;
+            },
+
 
         }
 
         this.task_tool = {
+            // local storage에 있는 데이러만 사용
             get_tableRowInfo: function (table_row) { // table row에서 각 항목별 정복 추출
                 let result = {
                     task: table_row.cells[TASK_TABLE_INDEX["Task"]].innerText.trim(),
@@ -123,15 +141,20 @@ class Task {
 
                 return newDatail_obj;
             },
-            get_taskInfo: function () { //search in hometasklist
-                let task_name = CLASS_Obj.loader.load_TaskName();
+            get_taskInfo: function (task_name) { //search in hometasklist
+
+                if (task_name === undefined) {
+                    task_name = CLASS_Obj.loader.load_TaskName();
+                }
+
+
                 let home_Storage = CLASS_Obj.HOME_TASKLIST_Storage;
                 let taskinfo = CLASS_Obj.task_tool.find_task_inHome(task_name, home_Storage);
 
                 return taskinfo;
             },
             get_detail_taskInfo: function (table_taskname, detail_task_lists) { // search in detail_task_lists
-
+                // 이거쓰나?
                 let detail_info = {
                     is_find: false,
                     detail_obj: {},
@@ -149,9 +172,12 @@ class Task {
                 }
                 return detail_info;
             },
-            get_CurrentTaskobj: function () {
+            get_CurrentTaskobj: function (task_name) {
+                /*
+                taskname이 입력되지 않으면 현재 taskname 대입
+                */
                 let home_tasklist = JSON.parse(localStorage.getItem(CLASS_Obj.HOME_TASKLIST_Storage));
-                let taskinfo = this.get_taskInfo();
+                let taskinfo = this.get_taskInfo(task_name);
                 let result;
 
                 if (taskinfo.is_find === true) {
@@ -168,34 +194,32 @@ class Task {
                 }
                 return result
             },
-            calc_column_sum: function (column_idx) {
-                let table = CLASS_Obj.Task_Table__table;
-                let row_number = table.rows.length;
-
-                let sum_result = 0;
-                let table_text;
-                for (let row_idx = 0; row_idx < row_number; row_idx++) {
-                    if (row_idx >= 1 && row_idx < row_number - 1) {
-                        table_text = table.rows[row_idx].cells[column_idx].innerText;
-                        if (typeof (table_text) == "string") {
-                            sum_result += parseInt(table_text);
-                        }
-                    }
-                }
-                return sum_result;
-            },
             calc_eachPara_sum: function () {
-                /*
-                Parameter     | Index
-                ----------------------
-                Expected time | 1
-                Performance   | 2
-                Remaining     | 3
-                */
-                let totalTasknum = CLASS_Obj.Task_Table__table.rows.length - 2;
-                let expectedSum = this.calc_column_sum(1);
-                let performanceSum = this.calc_column_sum(2);
-                let remainingSum = this.calc_column_sum(3);
+                let curObjInfo = this.get_CurrentTaskobj();
+                let totalTasknum;
+                let expectedSum;
+                let performanceSum;
+                let remainingSum;
+
+
+                if (curObjInfo.is_find === true) {
+                    let cur_Obj = curObjInfo.task_obj;
+                    let task_detail_lists = cur_Obj.tableInfo.task_detail_lists;
+                    totalTasknum = task_detail_lists.length;
+                    expectedSum = 0;
+                    performanceSum = 0;
+                    remainingSum = 0;
+
+                    for (let i = 0; i < totalTasknum; i++) {
+                        let detail_obj = task_detail_lists[i];
+                        expectedSum += parseInt(detail_obj.expected_time);
+                        performanceSum += parseInt(detail_obj.performance);
+                        remainingSum += parseInt(detail_obj.remaining);
+                    }
+                } else {
+                    alert("calc_eachPara_sum!!");
+                }
+
                 let result = {
                     totalTasknum: totalTasknum, // total task number
                     expectedSum: expectedSum,
@@ -204,47 +228,46 @@ class Task {
                 }
                 return result;
             },
-            calc_summaryInfo: function () { // Table UI 정보를 기반으로 계산
-                function check_progress() {
-                    let excuted_task = 0
-                    for (let row_idx = 0; row_idx < CLASS_Obj.Task_Table__table.rows.length - 1; row_idx++) {
-                        if (row_idx >= 1) { // header 제외
-                            if (parseInt(CLASS_Obj.Task_Table__table.rows[row_idx].cells[2].innerText) !== 0) {
-                                excuted_task += 1;
-                            }
+            calc_summaryInfo: function () {
+                let curObjInfo = this.get_CurrentTaskobj();
+                let excuted_taskNum;
+                let cur_Obj;
+                let task_detail_lists;
+
+                if (curObjInfo.is_find === true) {
+                    cur_Obj = curObjInfo.task_obj;
+                    task_detail_lists = cur_Obj.tableInfo.task_detail_lists;
+                    excuted_taskNum = 0
+                    for (let i = 0; i < task_detail_lists.length; i++) {
+                        let detail_obj = task_detail_lists[i];
+                        if (parseInt(detail_obj.performance) !== 0) {
+                            excuted_taskNum += 1;
                         }
                     }
-                    return excuted_task;
+                    let total_taskNum = task_detail_lists.length;
+                    let performance_Ratio = String((100 * excuted_taskNum / total_taskNum).toFixed(2)) + "%";
+                    let performance_Amount = cur_Obj.tableInfo.performanceSum;
+                    let remaining_Ratio = String((100 * (1 - excuted_taskNum / total_taskNum)).toFixed(2)) + "%";
+                    let remaining_Amount = cur_Obj.tableInfo.remainingSum;
+
+                    let summary_info = {
+                        Ratio: {
+                            performance: performance_Ratio,
+                            remaining: remaining_Ratio,
+                        },
+                        Amount: {
+                            performance: performance_Amount,
+                            remaining: remaining_Amount,
+                        },
+                    }
+
+                    return summary_info;
+
+                } else {
+                    alert("calc_summaryInfo Error!");
                 }
-
-                let excuted_taskNum = check_progress();
-                let total_taskNum = CLASS_Obj.Task_Table__table.rows.length - 2; // header와 sum 제외
-
-                let performance_Idx = TASK_TABLE_INDEX["Performance"];
-                let expected_time_Idx = TASK_TABLE_INDEX["Expected Time"];
-
-                let performance_Ratio = String((100 * excuted_taskNum / total_taskNum).toFixed(2)) + "%";
-                let performance_Amount = CLASS_Obj.Task_Table__table.rows[total_taskNum + 1].cells[performance_Idx].innerText;
-                let remaining_Ratio = String((100 * (1 - excuted_taskNum / total_taskNum)).toFixed(2)) + "%";
-                let remaining_Amount = CLASS_Obj.Task_Table__table.rows[total_taskNum + 1].cells[expected_time_Idx].innerText;
-
-                let summary_info = {
-                    Ratio: {
-                        performance: performance_Ratio,
-                        remaining: remaining_Ratio,
-                    },
-                    Amount: {
-                        performance: performance_Amount,
-                        remaining: remaining_Amount,
-                    },
-                }
-
-                return summary_info;
-
             }
-
         }
-
         this.updater = {
             update_Taskobj: function (updated_task_obj) {
                 let taskinfo = CLASS_Obj.task_tool.get_taskInfo();
@@ -257,7 +280,9 @@ class Task {
                 }
             },
 
-            update_Table_Sum: function (curSum_info) {
+            update_Table_Sum: function () {
+                this.update_tableInfo(); // table 데이터 local에 update
+                let curSum_info = CLASS_Obj.task_tool.calc_eachPara_sum();
                 let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
                 if (curTask_info.is_find === true) {
                     let curTask_obj = curTask_info.task_obj;
@@ -292,7 +317,7 @@ class Task {
             update_tableInfo: function () {
                 // table의 각 행정보를 lcoal storag에 update
                 let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
-
+                CLASS_Obj.table.update_remaningTime(); // remainingui update
                 if (curTask_info.is_find === true) {
                     let curTask_obj = curTask_info.task_obj;
                     let task_detail_lists = curTask_obj.tableInfo.task_detail_lists;
@@ -320,6 +345,49 @@ class Task {
                     alert("update_tableInfo error!");
                 }
 
+            },
+            update_dashboardInfo: function () {
+                function calc_remainDay(due_date) {
+                    let termArr = due_date.split(".");
+                    let due__year = parseInt(termArr[0]);
+                    let due__month = parseInt(termArr[1]);
+                    let due__date = parseInt(termArr[2]);
+                    if (due__year && due__month && due__date) {
+                        let today = new Date();
+                        let today__year = today.getFullYear();
+                        let today__month = today.getMonth() + 1;
+                        let today__date = today.getDate();
+
+                        let todayDate = new Date(today__year, today__month, today__date);
+                        let dueDate = new Date(due__year, due__month, due__date);
+
+                        let distance = dueDate.getTime() - todayDate.getTime();
+
+                        let remain_day = Math.floor(distance / (1000 * 60 * 60 * 24));
+
+                        return remain_day;
+                    } {
+                        alert("clar remain day Error!");
+                        return 0;
+                    }
+
+                }
+
+                let task_objInfo = CLASS_Obj.task_tool.get_CurrentTaskobj();
+                if (task_objInfo.is_find === true) {
+                    let cur_Obj = task_objInfo.task_obj;
+
+                    cur_Obj.dash_boardInfo.progress = cur_Obj.tableInfo.performance_ratio;
+                    cur_Obj.dash_boardInfo.remain_total = cur_Obj.tableInfo.remainingSum;
+                    if (cur_Obj.dash_boardInfo.due_date !== undefined && cur_Obj.dash_boardInfo.due_date !== "") {
+                        cur_Obj.dash_boardInfo.remain_day = calc_remainDay(cur_Obj.dash_boardInfo.due_date);
+                        cur_Obj.dash_boardInfo.remain_perday = Math.floor(cur_Obj.tableInfo.remainingSum / calc_remainDay(cur_Obj.dash_boardInfo.due_date));
+                    }
+
+                    this.update_Taskobj(cur_Obj);
+                } else {
+                    alert("   update_dashboardInfo Error!");
+                }
             }
 
         }
@@ -374,7 +442,7 @@ class Task {
 
                     load_table_Row(task_name, task_detail_lists); // table의 각 행 load
                     CLASS_Obj.table.change_Table_Sum_UI();
-                    CLASS_Obj.table.change_Table_Summary_UI();
+                    CLASS_Obj.summary.change_Table_Summary_UI();
                 } else {
                     alert("No Task Error!");
                 }
@@ -382,7 +450,14 @@ class Task {
 
         }
         this.summary = {
+            change_Table_Summary_UI: function () { // init func
+                let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo();
+                CLASS_Obj.Performance_ratio__value_DOM.innerText = curSummary_info.Ratio.performance;
+                CLASS_Obj.Remaining_ratio__value_DOM.innerText = curSummary_info.Ratio.remaining;
+                CLASS_Obj.Performance_amount__value_DOM.innerText = curSummary_info.Amount.performance;
+                CLASS_Obj.Remaining_amount__value_DOM.innerText = curSummary_info.Amount.remaining;
 
+            },
         }
 
         this.table = {
@@ -391,6 +466,24 @@ class Task {
             detail_object: {}, // 각각의 Detail Object들의 list
             storage_address: CLASS_Obj.HOME_TASKLIST_Storage,
             sample: "saampE!", // for test
+            update_remaningTime() {
+                let expectedIdx = TASK_TABLE_INDEX["Expected Time"];
+                let perforIdx = TASK_TABLE_INDEX["Performance"];
+                let remainIdx = TASK_TABLE_INDEX["Remaining"];
+
+                let row_number = CLASS_Obj.Task_Table__table.rows.length;
+
+                for (let row_idx = 0; row_idx < row_number - 1; row_idx++) {
+                    if (row_idx >= 1) {  // header 제외
+                        let expectedTime = parseInt(CLASS_Obj.Task_Table__table.rows[row_idx].cells[expectedIdx].innerText);
+                        let performTime = parseInt(CLASS_Obj.Task_Table__table.rows[row_idx].cells[perforIdx].innerText);
+                        CLASS_Obj.Task_Table__table.rows[row_idx].cells[remainIdx].innerText = String(expectedTime - performTime);
+
+                    }
+
+                }
+
+            },
             change_Table_Sum_UI: function () { // init func
                 let curSum_info = CLASS_Obj.task_tool.calc_eachPara_sum();
 
@@ -400,14 +493,7 @@ class Task {
                 CLASS_Obj.Table__remaining_Sum_DOM.innerHTML = curSum_info.remainingSum;
 
             },
-            change_Table_Summary_UI: function () { // init func
-                let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo();
-                CLASS_Obj.Performance_ratio__value_DOM.innerText = curSummary_info.Ratio.performance;
-                CLASS_Obj.Remaining_ratio__value_DOM.innerText = curSummary_info.Ratio.remaining;
-                CLASS_Obj.Performance_amount__value_DOM.innerText = curSummary_info.Amount.performance;
-                CLASS_Obj.Remaining_amount__value_DOM.innerText = curSummary_info.Amount.remaining;
 
-            },
             make_tableRow: function (row_info) {
                 let task_name = row_info.task_name;
                 let detail_subtask_name = row_info.detail_subtask_name;
@@ -463,18 +549,18 @@ class Task {
             },
             change_table: function () {
                 // [1]_ 각 행의 칼럼별 정보 update
-                CLASS_Obj.updater.update_tableInfo();
+                CLASS_Obj.updater.update_tableInfo(); // local storage에 update
 
                 // [2]_ 각 행의 칼럼별 합계 update
-                let curSum_info = CLASS_Obj.task_tool.calc_eachPara_sum();
-                CLASS_Obj.updater.update_Table_Sum(curSum_info);
+
+                CLASS_Obj.updater.update_Table_Sum();
                 this.change_Table_Sum_UI();
 
                 // [3]_ Summary update
                 let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo();
                 CLASS_Obj.updater.update_Summary(curSummary_info);
-                this.change_Table_Summary_UI();
-
+                CLASS_Obj.summary.change_Table_Summary_UI();
+                CLASS_Obj.updater.update_dashboardInfo();
             },
             add_lastrow: function () {
                 let task_clsObj = this.this_class;
