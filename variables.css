@@ -1,22 +1,46 @@
 :root {
     --yellow: #fae100;
-    --background_color : #1f2124;
-    --status_color : rgb(109, 109, 218);
+    --background_color : #1f2124; 
+    --status_color :#357EC7;
     --titlecolor: whitesmoke;
     --info_indent: 13px;
     --main_frame_top_margin:40px;
     --component-Status_top_margin:30px;
     --component_Title_top_margin:10px;
 
-    /* Memo Variable */
-    --deactivated_Btn_Color: gray;
+    /* Navigation */
+    --navigation_margin_top:30px;
     
+    /* Home Table*/
+    --home_table_margin_top:12px;
+    --home_table_distance:30px;
 
-    /* Schedule Variable */
-    --past_Color: gray;
+    /* dashboard table */
+    --dashboard_table_header_color :#2B65EC ;/*MediumAquaMarine (W3C)*/
 
 
-    /* MD Variable */
-    --md_frame_outline:5px solid blue;
-    --md_frame_background:#FFFFE0;
-}
+    /* schedule table  */
+    --schedule_table_header_color:#2B65EC; /*	MediumTurquoise (W3C)*/
+    --schedule_table_header_daylists_color:  #6495ED; /* PaleTurquoise (W3C)*/
+
+    /* schedule statistics  */
+    --schedule_statistics_margin_top:30px;
+
+    /* task table */
+    --task_table_header_color:#2B65EC;
+
+    --task_sum_color:#F8B88B;
+    --task_sum_border_color:#7D0552;
+    --duedate_color:#A70D2A;
+
+    /* task summary*/
+    --summary_margin_top:12px;
+
+    /* progress bar */
+    --progress_L5: #0E6251;
+    --progress_L4: #148F77;
+    --progress_L3: #1ABC9C;
+    --progress_L2: #76D7C4;
+    --progress_L1: #D1F2EB;
+
+}   

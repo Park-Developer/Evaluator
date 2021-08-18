@@ -32,6 +32,7 @@
     <!--Main-->
     <div class="home_dashboard">
       <!--Main Home DashBoard-->
+      <span class="home_dashboard__title"><i class="fas fa-thumbtack"></i> Task Lists</span>
       <table class="home_dashboard__table">
         <tr class="home_dashboard__header">
           <th rowspan="2" class="home_dashboard__tasklist">Task</th>
@@ -57,14 +58,19 @@
     <!--Main Home DashBoard End-->
 
     <div class="home_schedule">
-      <span>Monthly Schedule</span>
+      <span class="home_schedule__title"><i class="far fa-calendar-alt"></i> Monthly Schedule</span>
       <table class="home_schedule__table">
       </table>
+
+      <div class="home_schedule_statistics">
+      <span class="home_schedule_statistics__title"><i class="fas fa-poll"></i> Monthly Statistics</span>
+      <canvas class="month_statistics_chart" width="300" height="230"></canvas>
+      </div>
     </div>
     <!--home_schedule End-->
   </div>
   <!--Main end-->
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://kit.fontawesome.com/3dbd9a16b0.js" crossorigin="anonymous"></script>
   <script src="./main.js"></script>
 

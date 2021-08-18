@@ -10,9 +10,9 @@ function getTime() {
     const seconds = date.getSeconds()
 
     const month = date.getMonth()
-    const day = date.getDay();
+    const day = date.getDate();
     const year = date.getUTCFullYear();
-    clockDate.innerText = `${year}-${month + 1}-${day + 2}`;
+    clockDate.innerText = `${year}-${month + 1}-${day}`;
     clockTime.innerText = `${hours}:${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 }
 

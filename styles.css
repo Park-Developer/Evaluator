@@ -17,9 +17,59 @@
     color:white;
     margin:30px;
 }
+/*  [HOME DASHBOARD]  */
+.home_dashboard{
+    margin-top:var(--navigation_margin_top);
+}
+.home_dashboard__table{
+    margin-top:var(--home_table_margin_top);
+    margin-right:var( --home_table_distance);
+    table-layout: auto;
+}
+
 .home_dashboard__header{
-    background-color:gray;
+    background-color:var(--dashboard_table_header_color);
 }
 .home_dashboard__header__2ndrow{
-    background-color:gray;
+    background-color:var(--dashboard_table_header_color);
+}
+
+/*  ************************************************* */
+
+/*  [Schedule]  */
+.home_schedule{
+    margin-top:var(--navigation_margin_top);
+}
+.home_schedule__table{
+    margin-top:var(--home_table_margin_top);
+
+
+}
+.home_schedule__header{
+    background-color: var(--schedule_table_header_color);
+}
+.home_scedule__daylists{
+    background-color: var( --schedule_table_header_daylists_color);
+}
+
+/*  [Schedule_statistics]  */
+.home_schedule_statistics{
+    margin-top: var(--schedule_statistics_margin_top);
+}
+
+/*TEST*/
+.task1_D1{
+    background-color: var(--progress_L1);
+}
+.task1_D2{
+    background-color: var(--progress_L2);
+}
+.task1_D3{
+    background-color: var(--progress_L3);
+}
+.task1_D4{
+    background-color: var(--progress_L4);
+}
+.task1_D5{
+    background-color: var(--progress_L5);
 }

@@ -10,12 +10,30 @@
     table-layout: fixed;
 }
 .Task_Table__header{
-    background-color: aquamarine;
+    background-color: var(--task_table_header_color);
+}
+.Task_Title_duedate__value{
+    color:var(--duedate_color);
+}
+/* Summary */
+.Summary{
+    margin: 30px;
+    color : white;
 }
 .Summary_statistics{
     display: flex;
 }
 
 .Task_Table__summary{
-background-color: gray;
+    border-top: 2px solid ;
+    border-top-color: var(--task_sum_border_color);
+    color:var(--task_sum_color);
+}
+
+.Summary_statistics__ratio{
+    margin-top:var(--summary_margin_top);
+}
+
+.Summary_statistics__amount{
+    margin-top:var(--summary_margin_top);
 }

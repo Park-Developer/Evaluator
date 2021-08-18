@@ -184,7 +184,9 @@ class Dashboard {
         const Dash_TABLE_INDEX = {
             "Task Name": 0,
             "Due Date": 1,
-        }
+        };
+        const SCHEDULE_CELL_WIDTH = "30px";
+
         this.Home_TaskLists; // Home Task Lists;
 
         this.localstoraged_taskinfo = "HOME_TASK_INFO";
@@ -330,6 +332,7 @@ class Dashboard {
                 function make_header(month, daysin_month) {    // Table Header Setting
                     let header_tr = document.createElement('tr');
                     let header_td = document.createElement('td');
+                    header_tr.classList.add("home_schedule__header");
                     header_tr.appendChild(header_td);
                     header_td.innerText = String(month) + "月";
                     header_td.colSpan = String(daysin_month + 1);
@@ -347,17 +350,21 @@ class Dashboard {
                 for (let row_idx = 0; row_idx < Task_numbers + 1; row_idx++) {
                     //[1] Row Setting
                     let tr = document.createElement('tr');
-                    tr.classList.add("scedule_row_" + String(row_idx));
+                    tr.classList.add("schedule_row_" + String(row_idx));
 
                     //[2] Column Setting
                     for (let col_idx = 0; col_idx < month_info.daysInMonth + 1; col_idx++) {
                         if (row_idx === 0) { //header행인 경우
+                            tr.classList.add("home_scedule__daylists");
                             let td = document.createElement('td');
                             if (col_idx === 0) {
                                 td.innerText = "Task";
                             } else {
-                                td.innerText = String(col_idx) + "일";
+                                td.innerText = String(col_idx);
                             }
+
+                            td.classList.add("header" + String(col_idx));
+                            td.style.width = SCHEDULE_CELL_WIDTH;
                             tr.appendChild(td);
                         } else { // header행이 아닌경우
                             let td = document.createElement('td');
@@ -366,6 +373,9 @@ class Dashboard {
                             } else {
                                 td.innerText = ".";
                             }
+
+                            td.classList.add(Hometask_lists[row_idx - 1].dash_boardInfo.task_name + "_D" + String(col_idx));
+                            td.style.width = SCHEDULE_CELL_WIDTH;
                             tr.appendChild(td);
                         }
                     }
@@ -374,6 +384,118 @@ class Dashboard {
                     DASH_BOARD.home_schedule__table.appendChild(tr);
                 }
             }
+        }
+        this.chart = {
+
+            work_chart: new Chart(document.querySelector(".month_statistics_chart"), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: "Today Work!",
+                            backgroundColor: this.chartBackground_list,
+                            data: []
+                        }
+                    ]
+                },
+                options: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Work Chart'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0
+                        }
+                    }
+                }
+            }),
+            update_chartHistory: function () {
+                /* 
+                1. Localstorage에 저장되어 있는 timer list를 읽어서 저장된 timer 정보 확인
+                2. 오늘 수행된 시간 계산
+                */
+                function get_Todayinfo() {
+                    let today = new Date();
+                    let today__month = today.getMonth() + 1;//Get the month as a number (0-11)
+                    let today__date = today.getDate();//Get the day as a number (1-31)
+                    let result = {
+                        month: today__month,
+                        date: today__date
+                    }
+                    return result;
+                }
+                let today_info = get_Todayinfo();
+
+                let task_name = CLASS_Obj.loader.load_TaskName();
+                let home_Storage = CLASS_Obj.HOME_TASKLIST_Storage;
+                let home_tasklist = JSON.parse(localStorage.getItem(home_Storage));
+                let taskinfo = CLASS_Obj.task_tool.find_task_inHome(task_name, home_Storage);
+                let task_obj = home_tasklist[taskinfo.task_loc];
+                let task_detail_lists = task_obj.tableInfo.task_detail_lists;
+
+                let today_chartObj = {}; // today performance 모음
+                /*
+                today_chartObj={
+                    task1:Integer,
+                    task2:Integer
+                }
+                */
+
+                for (let idx = 0; idx < task_detail_lists.length; idx++) {// task loop
+                    let today_taskObj__name = task_detail_lists[idx].task;
+                    let task_history = task_detail_lists[idx].timer_info.today_history;
+                    for (let [key, value] of Object.entries(task_history)) { // loop for history
+                        /*
+                        key : try N 
+                        value : {
+                            start_date: String, 
+                            recorded_time: Integer,
+                        }
+                        */
+                        let start_date = value.start_date;
+                        let recorded_time = value.recorded_time;
+                        let dateAry = start_date.split('.');
+                        let task__month = parseInt(dateAry[1]);
+                        let task__date = parseInt(dateAry[2]);
+                        if (today_info.month === task__month && today_info.date === task__date) {
+                            if (today_chartObj.hasOwnProperty(today_taskObj__name) == true) {
+                                today_chartObj[today_taskObj__name] += recorded_time;
+                            } else {
+                                today_chartObj[today_taskObj__name] = recorded_time;
+                            }
+                        }
+                    }
+                }
+                return today_chartObj;
+            },
+            update_chartUI: function () {
+                let today_chartObj = this.update_chartHistory();
+
+                let task_labels = [];
+                let task_data = [];
+                let background = [];
+                let bg_cnt = 0;
+                const CHART = {
+                    CHART_BACKGROUND_LIST: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
+                };
+                for (let [key, value] of Object.entries(today_chartObj)) {
+
+                    task_labels.push(key); // key : task name
+                    task_data.push(value); // value : task time
+                    background.push(CHART.CHART_BACKGROUND_LIST[bg_cnt % CHART.CHART_BACKGROUND_LIST.length]);
+
+                    bg_cnt += 1;
+                }
+                this.work_chart["data"]["labels"] = task_labels;
+                this.work_chart["data"]["datasets"][0]["data"] = task_data;
+
+                this.work_chart["data"]["datasets"][0]["backgroundColor"] = background;
+                this.work_chart.update();
+            },
         }
     }// constructor
 
@@ -565,6 +687,7 @@ class Schedule {
         let tr = document.createElement('tr');
         let td = document.createElement('td');
         tr.appendChild(td);
+        tr.classList.add("home_schedule__header");
         td.innerText = String(this.month) + "월";
         td.colSpan = String(this.daysInMonth);
         td.style.textAlign = "center";

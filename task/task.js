@@ -20,7 +20,9 @@ class Task {
         this.Task_Btn_Change = Task.querySelector(".Task_Btn_Change");
         this.Task_Selector = Task.querySelector(".Task_Selector__selection");
         this.Task_UI_Title = Task.querySelector(".Task_Title");
+        this.Task_Duedate = Task.querySelector(".Task_Title_duedate__value");
         this.Task_Home_Btn = document.querySelector(".home_Retry_Btn");
+
 
         this.Table_tasklist_Sum = Task.querySelector(".Task_Table__tasklist_Sum");
         this.Table__expectedtime_Sum_DOM = Task.querySelector(".Task_Table__expectedtime_Sum");
@@ -423,6 +425,8 @@ class Task {
 
                 if (taskinfo.is_find === true) {
                     task_obj = home_tasklist[taskinfo.task_loc];
+                    // Task Due date Change
+                    CLASS_Obj.Task_Duedate.innerText = task_obj.dash_boardInfo.due_date;
 
                     let task_detail_lists = task_obj.tableInfo.task_detail_lists;
 
