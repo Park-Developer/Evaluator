@@ -186,6 +186,35 @@ class Dashboard {
             "Due Date": 1,
         };
         const SCHEDULE_CELL_WIDTH = "30px";
+        const SCHEDULE_COLOR_STANDARD = {
+            Level1: {
+                min: 0,
+                max: 5
+            },
+            Level2: {
+                min: 6,
+                max: 10
+            },
+            Level3: {
+                min: 11,
+                max: 15
+            },
+            Level4: {
+                min: 16,
+                max: 20
+            },
+            Level5: {
+                min: 21,
+                max: 25
+            },
+        };
+        const SCHEDULE_COLOR = {
+            Level5: "#0E6251",
+            Level4: "#148F77",
+            Level3: "#1ABC9C",
+            Level2: "#76D7C4",
+            Level1: "#D1F2EB",
+        };
 
         this.Home_TaskLists; // Home Task Lists;
 
@@ -241,7 +270,7 @@ class Dashboard {
                 return result;
             },
 
-            get_taskObj(task_name) {
+            get_taskObj: function (task_name) {
                 let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
                 let find_Result = this.find_task(task_name);
                 if (find_Result.is_find === true) {
@@ -250,7 +279,52 @@ class Dashboard {
                     alert("gettaskobj error!");
                     return undefined;
                 }
-            }
+            },
+            get_dayInfo: function (hist__start_time) {
+                //start_date: "2021. 8. 16. 오전 2:27:59"
+                let day_array = hist__start_time.split(".");
+                let month = parseInt(day_array[1]);
+                let date = parseInt(day_array[2]);
+                let result = {
+                    month: month,
+                    date: date,
+                };
+                return result;
+            },
+            calc_mothly_statistics: function () {
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let today = new Date();
+                let this__month = today.getMonth() + 1;//Get the month as a number (0-11)
+                let chart_dataPoints = {};
+
+                if (Home_TaskLists !== null) {
+                    for (let i = 0; i < Home_TaskLists.length; i++) {
+                        let taskobj = Home_TaskLists[i];
+                        let taskobj_detail_lists = taskobj.tableInfo.task_detail_lists;
+                        for (let j = 0; j < taskobj_detail_lists.length; j++) {
+                            let detail_obj_hist = taskobj_detail_lists[j].timer_info.today_history;
+                            for (let [key, value] of Object.entries(detail_obj_hist)) {
+                                let day_info = value.start_date;
+                                let recorded_time = value.recorded_time;
+
+                                let hist_info = DASH_BOARD.dash_tool.get_dayInfo(day_info);
+                                let hist_month = hist_info.month;
+                                let hist_date = hist_info.date;
+                                console.log(recorded_time, typeof (recorded_time));
+                                if (this__month === hist_month) {
+                                    if (chart_dataPoints.hasOwnProperty(hist_date) === true) {
+                                        chart_dataPoints[hist_date] += recorded_time;
+                                    } else {
+                                        chart_dataPoints[hist_date] = recorded_time;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                return chart_dataPoints;
+            },
         }
         this.loader = {
             load_localstorage_to_Home: function () {
@@ -278,6 +352,10 @@ class Dashboard {
                         DASH_BOARD.dash_tool.set_row_property(newRow, true, "center");
                     }
                 }
+
+                // table color load
+                DASH_BOARD.Schedule.make_schedule_table();
+                DASH_BOARD.Schedule.change_scheduleUI();
             },
         }
         this.updater = {
@@ -328,6 +406,17 @@ class Dashboard {
                 return result;
 
             },
+            apply_color: function (time) {
+                let result = SCHEDULE_COLOR["Level1"];
+
+                for (let [key, value] of Object.entries(SCHEDULE_COLOR_STANDARD)) {
+                    if (value.max >= time && time >= value.min) {
+                        result = SCHEDULE_COLOR[key];
+                        break;
+                    }
+                }
+                return result;
+            },
             make_schedule_table: function () {
                 function make_header(month, daysin_month) {    // Table Header Setting
                     let header_tr = document.createElement('tr');
@@ -337,7 +426,7 @@ class Dashboard {
                     header_td.innerText = String(month) + "月";
                     header_td.colSpan = String(daysin_month + 1);
                     header_td.style.textAlign = "center";
-
+                    header_td.style.fontWeight = "bold";
                     return header_tr;
                 }
 
@@ -365,16 +454,21 @@ class Dashboard {
 
                             td.classList.add("header" + String(col_idx));
                             td.style.width = SCHEDULE_CELL_WIDTH;
+                            td.style.textAlign = "center";
+                            td.style.fontWeight = "bold";
                             tr.appendChild(td);
                         } else { // header행이 아닌경우
+                            let taskname = Hometask_lists[row_idx - 1].dash_boardInfo.task_name;
+                            tr.classList.add(taskname);
                             let td = document.createElement('td');
                             if (col_idx === 0) {
-                                td.innerText = Hometask_lists[row_idx - 1].dash_boardInfo.task_name;
+                                td.innerText = taskname;
                             } else {
                                 td.innerText = ".";
+                                td.style.textAlign = "center";
                             }
 
-                            td.classList.add(Hometask_lists[row_idx - 1].dash_boardInfo.task_name + "_D" + String(col_idx));
+                            td.classList.add(taskname + "_D" + String(col_idx));
                             td.style.width = SCHEDULE_CELL_WIDTH;
                             tr.appendChild(td);
                         }
@@ -383,119 +477,108 @@ class Dashboard {
                     //[3] Add row
                     DASH_BOARD.home_schedule__table.appendChild(tr);
                 }
-            }
-        }
-        this.chart = {
+            },
+            change_taskColorUI: function (task_name) {
+                let today = new Date();
+                let this__month = today.getMonth() + 1;//Get the month as a number (0-11)
 
-            work_chart: new Chart(document.querySelector(".month_statistics_chart"), {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [
-                        {
-                            label: "Today Work!",
-                            backgroundColor: this.chartBackground_list,
-                            data: []
-                        }
-                    ]
-                },
-                options: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: 'Work Chart'
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            min: 0
-                        }
-                    }
-                }
-            }),
-            update_chartHistory: function () {
-                /* 
-                1. Localstorage에 저장되어 있는 timer list를 읽어서 저장된 timer 정보 확인
-                2. 오늘 수행된 시간 계산
-                */
-                function get_Todayinfo() {
-                    let today = new Date();
-                    let today__month = today.getMonth() + 1;//Get the month as a number (0-11)
-                    let today__date = today.getDate();//Get the day as a number (1-31)
-                    let result = {
-                        month: today__month,
-                        date: today__date
-                    }
-                    return result;
-                }
-                let today_info = get_Todayinfo();
-
-                let task_name = CLASS_Obj.loader.load_TaskName();
-                let home_Storage = CLASS_Obj.HOME_TASKLIST_Storage;
-                let home_tasklist = JSON.parse(localStorage.getItem(home_Storage));
-                let taskinfo = CLASS_Obj.task_tool.find_task_inHome(task_name, home_Storage);
-                let task_obj = home_tasklist[taskinfo.task_loc];
-                let task_detail_lists = task_obj.tableInfo.task_detail_lists;
-
-                let today_chartObj = {}; // today performance 모음
-                /*
-                today_chartObj={
-                    task1:Integer,
-                    task2:Integer
-                }
-                */
-
-                for (let idx = 0; idx < task_detail_lists.length; idx++) {// task loop
-                    let today_taskObj__name = task_detail_lists[idx].task;
-                    let task_history = task_detail_lists[idx].timer_info.today_history;
-                    for (let [key, value] of Object.entries(task_history)) { // loop for history
-                        /*
-                        key : try N 
-                        value : {
-                            start_date: String, 
-                            recorded_time: Integer,
-                        }
-                        */
-                        let start_date = value.start_date;
+                let task_Obj = DASH_BOARD.dash_tool.get_taskObj(task_name);
+                let task__detail_lists = task_Obj.tableInfo.task_detail_lists;
+                for (let i = 0; i < task__detail_lists.length; i++) {
+                    let detail_obj_hist = task__detail_lists[i].timer_info.today_history;
+                    for (let [key, value] of Object.entries(detail_obj_hist)) {
+                        let day_info = value.start_date;
                         let recorded_time = value.recorded_time;
-                        let dateAry = start_date.split('.');
-                        let task__month = parseInt(dateAry[1]);
-                        let task__date = parseInt(dateAry[2]);
-                        if (today_info.month === task__month && today_info.date === task__date) {
-                            if (today_chartObj.hasOwnProperty(today_taskObj__name) == true) {
-                                today_chartObj[today_taskObj__name] += recorded_time;
+
+                        let hist_info = DASH_BOARD.dash_tool.get_dayInfo(day_info);
+                        let hist_month = hist_info.month;
+                        let hist_date = hist_info.date;
+                        if (this__month === hist_month) {
+                            let matched_row = DASH_BOARD.home_schedule__table.querySelector("." + task_name);
+                            let matched_col = matched_row.querySelector("." + task_name + "_D" + String(hist_date));
+                            if (matched_col.innerText === ".") {
+                                matched_col.innerText = parseInt(recorded_time);
+                                let matched_color = this.apply_color(parseInt(matched_col.innerText));
+                                matched_col.style.backgroundColor = matched_color;
                             } else {
-                                today_chartObj[today_taskObj__name] = recorded_time;
+                                matched_col.innerText = parseInt(matched_col.innerText) + parseInt(recorded_time);
+                                let matched_color = this.apply_color(parseInt(matched_col.innerText));
+                                matched_col.style.backgroundColor = matched_color;
                             }
                         }
                     }
                 }
-                return today_chartObj;
             },
-            update_chartUI: function () {
-                let today_chartObj = this.update_chartHistory();
-
-                let task_labels = [];
-                let task_data = [];
-                let background = [];
-                let bg_cnt = 0;
-                const CHART = {
-                    CHART_BACKGROUND_LIST: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
-                };
-                for (let [key, value] of Object.entries(today_chartObj)) {
-
-                    task_labels.push(key); // key : task name
-                    task_data.push(value); // value : task time
-                    background.push(CHART.CHART_BACKGROUND_LIST[bg_cnt % CHART.CHART_BACKGROUND_LIST.length]);
-
-                    bg_cnt += 1;
+            change_scheduleUI: function () {
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                for (let i = 0; i < Home_TaskLists.length; i++) {
+                    let task_name = Home_TaskLists[i].dash_boardInfo.task_name;
+                    this.change_taskColorUI(task_name);
                 }
-                this.work_chart["data"]["labels"] = task_labels;
-                this.work_chart["data"]["datasets"][0]["data"] = task_data;
-
-                this.work_chart["data"]["datasets"][0]["backgroundColor"] = background;
-                this.work_chart.update();
+            }
+        }
+        this.chart = {
+            // https://canvasjs.com/javascript-charts/chart-index-data-label/
+            month_info: {
+                1: "January",
+                2: "Feburary",
+                3: "March",
+                4: "April",
+                5: "May",
+                6: "Jun",
+                7: "July",
+                8: "August",
+                9: "September",
+                10: "October",
+                11: "November",
+                12: "December",
             },
+            render_chart: function () {
+                let month_rawdata = DASH_BOARD.dash_tool.calc_mothly_statistics();
+                let converted_month_data = [];
+                for (let [key, value] of Object.entries(month_rawdata)) {
+                    let time_date = { x: parseInt(key), y: parseInt(value) };
+                    converted_month_data.push(time_date);
+                }
+
+                let today = new Date();
+                let this__month = today.getMonth() + 1;//Get the month as a number (0-11)
+                let chart_title = this.month_info[this__month] + " Statisctics";
+
+                let chart = new CanvasJS.Chart("chartContainer", {
+                    animationEnabled: true,
+                    theme: "dark1", // "light1", "light2", "dark1", "dark2"
+                    title: {
+                        text: chart_title,
+                        fontSize: 20,
+                    },
+                    axisX: {
+                        title: "Days",
+                        labelFontSize: 15,
+                        titleFontSize: 15,
+                    },
+                    axisY: {
+                        title: "Working Time",
+                        includeZero: true,
+                        labelFontSize: 15,
+                        titleFontSize: 15,
+                    },
+                    legend: {
+                        fontSize: 10,
+                    },
+                    data: [{
+                        type: "line",
+                        color: "yellow", // data point color
+                        lineColor: "red", //**Change the color here
+                        indexLabelFontSize: 16,
+                        dataPoints: converted_month_data,
+                    }]
+                });
+                chart.render();
+            },
+
+
+
         }
     }// constructor
 
@@ -661,66 +744,6 @@ class Dashboard {
 
 }
 
-
-class Schedule {
-    constructor(task_info) {
-        // Task Setting
-        this.task_number = task_info.number;
-
-
-        this.home_schedule__table = document.querySelector(".home_schedule__table");
-        // [TABLE SETTING]
-        // Date Setting
-        let date_info = new Date();
-        // dt.getMonth() will return a month between 0 - 11
-        // we add one to get to the last day of the month 
-        // so that when getDate() is called it will return the last day of the month
-        this.month = date_info.getMonth() + 1;
-        this.year = date_info.getFullYear();
-
-        // this line does the magic (in collab with the lines above)
-        this.daysInMonth = new Date(this.year, this.month, 0).getDate();
-    }
-
-    make_schedule_table() {
-        // Table Header Setting
-        let tr = document.createElement('tr');
-        let td = document.createElement('td');
-        tr.appendChild(td);
-        tr.classList.add("home_schedule__header");
-        td.innerText = String(this.month) + "월";
-        td.colSpan = String(this.daysInMonth);
-        td.style.textAlign = "center";
-
-        this.home_schedule__table.appendChild(tr);
-        // Table Data Setting
-        for (let row_idx = 0; row_idx < this.task_number + 1; row_idx++) {
-            // Row Setting
-            let tr = document.createElement('tr');
-            tr.classList.add("scedule_row_" + String(row_idx));
-
-            // Column Setting
-
-            for (let col_idx = 0; col_idx < this.daysInMonth; col_idx++) {
-                if (row_idx == 0) {
-                    let td = document.createElement('td');
-                    td.innerText = String(col_idx + 1) + "일";
-                    tr.appendChild(td);
-                } else {
-                    let td = document.createElement('td');
-                    td.innerText = "..";
-                    tr.appendChild(td);
-                }
-            }
-
-
-            this.home_schedule__table.appendChild(tr);
-        }
-
-    }
-
-}
-
 let task_info = { "number": 3 };
 function TEST() {
     //let TEST_timer_storage = JSON.parse(localStorage.getItem("HOME_TASK_INFO"));
@@ -735,15 +758,15 @@ function init() {
     const dashboard = new Dashboard();
     dashboard.loader.load_localstorage_to_Home();
     dashboard.updater.update_dashboardInfo();
-    dashboard.Schedule.make_schedule_table();
+
     let home_TestBtn_DOM = document.querySelector(".Test");
     home_TestBtn_DOM.addEventListener("click", () => {
         TEST();
     });
 
+    dashboard.chart.render_chart();
 
-    let calculatedObj = home.task_search("HOME_TASK_INFO");
-    console.log("calculatedObj", calculatedObj);
+
 }
 
 init();

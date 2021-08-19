@@ -447,6 +447,7 @@ class Task {
                     load_table_Row(task_name, task_detail_lists); // table의 각 행 load
                     CLASS_Obj.table.change_Table_Sum_UI();
                     CLASS_Obj.summary.change_Table_Summary_UI();
+                    CLASS_Obj.chart.update_chartUI();
                 } else {
                     alert("No Task Error!");
                 }
@@ -597,6 +598,9 @@ class Task {
                 } else {
                     alert("add_lastrow error!");
                 }
+
+                // chart_update
+                CLASS_Obj.chart.update_chartUI();
 
                 //update table ui
                 CLASS_Obj.table.change_Table_Sum_UI();

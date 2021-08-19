@@ -17,14 +17,17 @@
 
     /* dashboard table */
     --dashboard_table_header_color :#2B65EC ;/*MediumAquaMarine (W3C)*/
-
+    --dashboard_table_title_color:#9AFEFF;
 
     /* schedule table  */
     --schedule_table_header_color:#2B65EC; /*	MediumTurquoise (W3C)*/
-    --schedule_table_header_daylists_color:  #6495ED; /* PaleTurquoise (W3C)*/
+    --schedule_table_header_daylists_color: #737CA1; /* PaleTurquoise (W3C)*/
+    --schedule_table_title_color:#9AFEFF;
 
     /* schedule statistics  */
     --schedule_statistics_margin_top:30px;
+    --schedule_statistics_title_color:#9AFEFF;
+
 
     /* task table */
     --task_table_header_color:#2B65EC;
@@ -32,9 +35,14 @@
     --task_sum_color:#F8B88B;
     --task_sum_border_color:#7D0552;
     --duedate_color:#A70D2A;
-
+    --task_selector_margin_top:20px;
+    --dashboard_tasktable_title_color:#9AFEFF;
+    
     /* task summary*/
-    --summary_margin_top:12px;
+    --summary_margin_top:20px;
+    --today_history_margin_top:20px;
+    --dashboard_tasksummary_title_color:#9AFEFF;
+
 
     /* progress bar */
     --progress_L5: #0E6251;
@@ -42,5 +50,12 @@
     --progress_L3: #1ABC9C;
     --progress_L2: #76D7C4;
     --progress_L1: #D1F2EB;
+
+    /* main chart*/
+    --home_chart_margin_top:12px;
+
+
+
+    
 
 }   

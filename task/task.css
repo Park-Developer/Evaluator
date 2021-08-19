@@ -21,7 +21,23 @@
     color : white;
 }
 .Summary_statistics{
+    margin-top:var(--summary_margin_top);
     display: flex;
+}
+.today_history{
+    margin-top:var( --today_history_margin_top);
+}
+
+.Task_Title{
+    color:var(--dashboard_tasktable_title_color);
+    font-weight: bold;
+}
+.Summary_Title{
+    color:var(--dashboard_tasksummary_title_color);
+    font-weight: bold;
+}
+.Task_Selector{
+margin-top:var(--task_selector_margin_top);
 }
 
 .Task_Table__summary{

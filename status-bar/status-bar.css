@@ -12,12 +12,16 @@
 }
 
 .status-bar__User
-{color : var(--titlecolor);}
+{
+    font-weight: bold;
+    color : var(--titlecolor);
+}
 
 
 
 .status-bar__Clock{
     margin-right: 30px;
+    font-weight: bold;
 }
 
 .status-bar__Clock_Date

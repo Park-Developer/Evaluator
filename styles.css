@@ -20,18 +20,25 @@
 /*  [HOME DASHBOARD]  */
 .home_dashboard{
     margin-top:var(--navigation_margin_top);
+     
 }
 .home_dashboard__table{
     margin-top:var(--home_table_margin_top);
     margin-right:var( --home_table_distance);
     table-layout: auto;
 }
-
+.home_dashboard__title{
+    color:var(--dashboard_table_title_color);
+    font-weight: bold;
+}
 .home_dashboard__header{
     background-color:var(--dashboard_table_header_color);
+    font-weight: bold;
+    
 }
 .home_dashboard__header__2ndrow{
     background-color:var(--dashboard_table_header_color);
+    font-weight: bold;
 }
 
 /*  ************************************************* */
@@ -42,8 +49,9 @@
 }
 .home_schedule__table{
     margin-top:var(--home_table_margin_top);
-
-
+    border-collapse: separate;
+    border-spacing:5px;
+    font-weight: bold;
 }
 .home_schedule__header{
     background-color: var(--schedule_table_header_color);
@@ -51,12 +59,24 @@
 .home_scedule__daylists{
     background-color: var( --schedule_table_header_daylists_color);
 }
-
+.home_schedule__title{
+    color:var(--schedule_table_title_color);
+    font-weight: bold;
+}
 /*  [Schedule_statistics]  */
 .home_schedule_statistics{
     margin-top: var(--schedule_statistics_margin_top);
 }
 
+
+/* [Main Chart]*/
+.month_statistics_chart{
+    margin-top: var( --home_chart_margin_top);
+}
+.home_schedule_statistics__title{
+    color:var(--schedule_statistics_title_color);
+    font-weight: bold;
+}
 /*TEST*/
 .task1_D1{
     background-color: var(--progress_L1);
