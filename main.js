@@ -226,6 +226,8 @@ class Dashboard {
         this.home_dashboard__table_DOM = document.querySelector(".home_dashboard__table");
         this.dashTable_AddBtn_DOM = document.querySelector(".Task_Btn__Add");
         this.dashTable_RemoveBtn_DOM = document.querySelector(".Task_Btn_Remove");
+        this.dashTable_ChangeBtn_DOM = document.querySelector(".Task_Btn_Change");
+        this.dashTable_ConfirmBtn_DOM = document.querySelector(".Task_Btn_Confirm");
         this.home_schedule__table = document.querySelector(".home_schedule__table");
 
 
@@ -242,7 +244,92 @@ class Dashboard {
             this.remove_dashTable_row();
         });
 
+        this.dashTable_ChangeBtn_DOM.addEventListener("click", () => {
+            // [1] 버튼 상태 변경
+            this.dashTable_AddBtn_DOM.disabled = true;
+            this.dashTable_RemoveBtn_DOM.disabled = true;
+            this.dashTable_ChangeBtn_DOM.style.display = "none";
+            this.dashTable_ConfirmBtn_DOM.style.display = "block";
+
+            // [2] Table 수정 허용
+            DASH_BOARD.dash_tool.set_table_editable(true);
+        });
+
+        this.dashTable_ConfirmBtn_DOM.addEventListener("click", () => {
+            // [1] 버튼 상태 변경
+            this.dashTable_AddBtn_DOM.disabled = false;
+            this.dashTable_RemoveBtn_DOM.disabled = false;
+            this.dashTable_ChangeBtn_DOM.style.display = "block";
+            this.dashTable_ConfirmBtn_DOM.style.display = "none";
+
+            //[2] Table 수정 허용
+            DASH_BOARD.dash_tool.set_table_editable(false); // 수정 금지
+            let isName_overlap = DASH_BOARD.dash_tool.check_taskName();
+            if (isName_overlap === false) {
+                DASH_BOARD.updater.update_dashboardInfo();
+            } else {
+                alert("overlaped name error!");
+            }
+
+
+
+        });
+
+
+
         this.dash_tool = {
+            set_table_editable: function (editable) {
+                let row_num = DASH_BOARD.home_dashboard__table_DOM.rows.length;
+                let cell_num = DASH_BOARD.home_dashboard__table_DOM.rows[0].cells.length;
+
+                // 수정가능 항목 : 1. Task Name, 2: Due Date
+                let taskname_idx = Dash_TABLE_INDEX["Task Name"];
+                let duedate_idx = Dash_TABLE_INDEX["Due Date"];
+
+                for (let i = 0; i < row_num; i++) {
+                    for (let j = 0; j < cell_num; j++) {
+                        if (j === taskname_idx || j === duedate_idx) {
+                            DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[j].setAttribute("contenteditable", editable);
+                        }
+
+                    }
+                }
+
+            },
+            check_taskName: function () {
+                // 동일한 task name이 있는지 확인
+                let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
+                let row_num = DASH_BOARD.home_dashboard__table_DOM.rows.length;
+                let taskname_idx = Dash_TABLE_INDEX["Task Name"];
+                let name_list = [];
+                let taskname;
+                let result = false;
+
+                for (let i = 0; i < row_num; i++) {
+                    if (i >= 2) { // header  제외
+                        taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[taskname_idx].innerText.trim();
+                        if (name_list.indexOf(taskname) !== -1) {
+                            // 이미 리스트에 존재하는 경우
+                            result = true;
+
+                            // local storage에 저장된 값으로 원복
+                            for (let row_idx = 0; row_idx < DASH_BOARD.home_dashboard__table_DOM.rows.length - 1; row_idx++) {
+                                if (row_idx >= 2) {
+                                    DASH_BOARD.home_dashboard__table_DOM.rows[row_idx].cells[taskname_idx].innerText = Home_TaskLists[row_idx - 2].dash_boardInfo.task_name;
+                                }
+
+                            }
+
+                            break;
+                        } else {
+                            name_list.push(taskname);
+                        }
+                    }
+
+
+                }
+                return result;
+            },
             set_row_property: function (row, editable, text_align) {
                 let cell_number = row.cells.length;
                 for (let i = 0; i < cell_number; i++) {
@@ -349,7 +436,7 @@ class Dashboard {
                         newCell5.innerText = Home_TaskLists[idx].dash_boardInfo.remain_perday;
 
                         // table 수정 가능 속성
-                        DASH_BOARD.dash_tool.set_row_property(newRow, true, "center");
+                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "center");
                     }
                 }
 
@@ -368,21 +455,19 @@ class Dashboard {
                 수정가능 목록 : Task name, Due Date 
                 */
                 let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
-                let task_numbers = Home_TaskLists.length;
+                let dash_table_rows = DASH_BOARD.home_dashboard__table_DOM.rows.length;
                 let task_idx = Dash_TABLE_INDEX["Task Name"];
                 let duedate_idx = Dash_TABLE_INDEX["Due Date"];
-                for (let i = 0; i < task_numbers; i++) {
-                    if (i >= 1) { // header 제외
-                        let table_Taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[task_idx].innerText;
-                        let table_Duedate = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[duedate_idx].innerText;
+                for (let i = 0; i < dash_table_rows; i++) {
+                    if (i >= 2) { // header 제외
+                        let table_Taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[task_idx].innerText.trim();
+                        let table_Duedate = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[duedate_idx].innerText.trim();
 
-                        let taskFind_result = DASH_BOARD.dash_tool.find_task(table_Taskname);
-                        if (taskFind_result.is_find === true) {
-                            // [1] task_name update
-                            Home_TaskLists[taskFind_result.task_loc].dash_boardInfo.task_name = table_Taskname;
-                            // [2] due_date update
-                            Home_TaskLists[taskFind_result.task_loc].dash_boardInfo.due_date = table_Duedate;
-                        }
+                        // [1] task_name update
+                        Home_TaskLists[i - 2].dash_boardInfo.task_name = table_Taskname;
+                        // [2] due_date update
+                        Home_TaskLists[i - 2].dash_boardInfo.due_date = table_Duedate;
+
                     }
 
                 }
@@ -740,6 +825,7 @@ class Dashboard {
     initial_setting() {
 
     }
+
 
 
 }
