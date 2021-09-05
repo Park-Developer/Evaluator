@@ -129,8 +129,15 @@ class Timer {
                         recorded_time: this.current_saved_time,
                     }
                 }
-                //Upload updated timer info to local storage
+                // [1] Upload updated "timer" info to local storage
                 home_tasklist[task_info.task_loc].tableInfo.task_detail_lists[detail_ObjInfo.obj_loc].timer_info = Cur_Timerinfo;
+
+                // [2] upload updated "performance" to local storage
+                home_tasklist[task_info.task_loc].tableInfo.task_detail_lists[detail_ObjInfo.obj_loc].performance = Cur_Timerinfo.timer_total_time;
+
+                // [3] upload updated "remaining" to local storage => performance time이 변경되므로 remaining time도 수정
+                let expectedTime = home_tasklist[task_info.task_loc].tableInfo.task_detail_lists[detail_ObjInfo.obj_loc].expected_time;
+                home_tasklist[task_info.task_loc].tableInfo.task_detail_lists[detail_ObjInfo.obj_loc].remaining = (Cur_Timerinfo.timer_total_time - expectedTime);
                 localStorage.setItem(this.storage_address, JSON.stringify(home_tasklist));
             } else {
                 alert("TIMER ERROR1!");
@@ -156,9 +163,19 @@ class Timer {
         this.cumulative_saved_time += this.current_saved_time;
         this.is_running = false;
 
-        this.update_timerInfo();
+        this.update_timerInfo(); // 변경된 timer정보를 local storage에 upload
         this.update_btn_UI();
-        test_table.chart.update_chartUI();
+
+
+        // [1] 변경된 UI를 Local Storage에 반영
+        TASK_TABLE.updater.update_tableInfo();
+        TASK_TABLE.updater.update_Table_Sum();
+        TASK_TABLE.updater.update_Summary();
+
+        // [2] TASK_TABLE UI 변경
+        TASK_TABLE.chart.change_chartUI();
+        TASK_TABLE.table.change_tableUI();
+        TASK_TABLE.summary.change_Table_Summary_UI();
     }
 
     update_btn_UI() {
@@ -169,7 +186,6 @@ class Timer {
         } else {
             this.Timer_Start_button_DOM.style.display = "none";
             this.Timer_End_button_DOM.style.display = "block";
-
         }
 
         this.interval = setInterval(this.display_recorded_time.bind(this), 100);

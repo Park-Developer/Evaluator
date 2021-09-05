@@ -383,7 +383,10 @@ class Dashboard {
                 let today = new Date();
                 let this__month = today.getMonth() + 1;//Get the month as a number (0-11)
                 let chart_dataPoints = {};
+                let this_year = today.getFullYear();
+                let daysInMonth = new Date(this_year, this__month, 0).getDate();
 
+                // [1] 기록이 있는 날짜에 대한 통계 처리
                 if (Home_TaskLists !== null) {
                     for (let i = 0; i < Home_TaskLists.length; i++) {
                         let taskobj = Home_TaskLists[i];
@@ -397,7 +400,7 @@ class Dashboard {
                                 let hist_info = DASH_BOARD.dash_tool.get_dayInfo(day_info);
                                 let hist_month = hist_info.month;
                                 let hist_date = hist_info.date;
-                                console.log(recorded_time, typeof (recorded_time));
+                                //console.log(recorded_time, typeof (recorded_time));
                                 if (this__month === hist_month) {
                                     if (chart_dataPoints.hasOwnProperty(hist_date) === true) {
                                         chart_dataPoints[hist_date] += recorded_time;
@@ -409,6 +412,15 @@ class Dashboard {
                             }
                         }
                     }
+                }
+
+                // [2] 기록이 없는 날도 포함해서 chart_dataPoints의 빈 데이터 보완
+                for (let d = 0; d < daysInMonth; d++) {
+                    let day = d + 1;
+                    if ((day in chart_dataPoints) === false) {
+                        chart_dataPoints[day] = 0;
+                    }
+
                 }
                 return chart_dataPoints;
             },
@@ -844,11 +856,6 @@ function init() {
     const dashboard = new Dashboard();
     dashboard.loader.load_localstorage_to_Home();
     dashboard.updater.update_dashboardInfo();
-
-    let home_TestBtn_DOM = document.querySelector(".Test");
-    home_TestBtn_DOM.addEventListener("click", () => {
-        TEST();
-    });
 
     dashboard.chart.render_chart();
 

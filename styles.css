@@ -77,19 +77,3 @@
     color:var(--schedule_statistics_title_color);
     font-weight: bold;
 }
-/*TEST*/
-.task1_D1{
-    background-color: var(--progress_L1);
-}
-.task1_D2{
-    background-color: var(--progress_L2);
-}
-.task1_D3{
-    background-color: var(--progress_L3);
-}
-.task1_D4{
-    background-color: var(--progress_L4);
-}
-.task1_D5{
-    background-color: var(--progress_L5);
-}

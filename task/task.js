@@ -12,6 +12,8 @@ class Task {
             "Remaining": 3,
             "Date": 4,
         };
+        const MAX_DETAIL_TASK_NUM = 30;
+
         // DOM Setting
         // (1). TABLE DOM 
         this.Task_Table__table = Task.querySelector(".Task_Table__table");
@@ -39,7 +41,11 @@ class Task {
 
         // Button Event setting
         this.Task_Btn_Add.addEventListener("click", () => {
-            this.table.add_lastrow();
+            let task_number = this.Task_Table__table.rows.length - 2;
+            if (task_number < MAX_DETAIL_TASK_NUM) {
+                this.table.add_lastrow();
+            }
+
         });
 
         this.Task_Btn_Remove.addEventListener("click", () => {
@@ -290,6 +296,7 @@ class Task {
                 return result;
             },
             calc_summaryInfo: function () {
+                // local storage에 저장되어 있는 정보를 기준으로 계싼
                 let curObjInfo = this.get_CurrentTaskobj();
                 let excuted_taskNum;
                 let cur_Obj;
@@ -359,7 +366,9 @@ class Task {
                 }
             },
 
-            update_Summary: function (curSummary_info) {
+            update_Summary: function () {
+                // old Ver
+                /*
                 let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
                 if (curTask_info.is_find === true) {
                     let curTask_obj = curTask_info.task_obj;
@@ -373,14 +382,62 @@ class Task {
                 } else {
                     alert("update_Table_Summary Error!");
                 }
+                */
+                // New Ver
+                // local storage에 저장되어 있는 정보를 기준으로 계싼
+                this.update_Table_Sum();
+
+                let curObjInfo = CLASS_Obj.task_tool.get_CurrentTaskobj();
+                let excuted_taskNum;
+                let cur_Obj;
+                let task_detail_lists;
+
+                if (curObjInfo.is_find === true) {
+                    cur_Obj = curObjInfo.task_obj;
+                    task_detail_lists = cur_Obj.tableInfo.task_detail_lists;
+                    excuted_taskNum = 0
+                    for (let i = 0; i < task_detail_lists.length; i++) {
+                        let detail_obj = task_detail_lists[i];
+                        if (parseInt(detail_obj.performance) !== 0) {
+                            excuted_taskNum += 1;
+                        }
+                    }
+                    let total_taskNum = task_detail_lists.length;
+                    let performance_Ratio = String((100 * excuted_taskNum / total_taskNum).toFixed(2)) + "%";
+                    let performance_Amount = cur_Obj.tableInfo.performanceSum;
+                    let remaining_Ratio = String((100 * (1 - excuted_taskNum / total_taskNum)).toFixed(2)) + "%";
+                    let remaining_Amount = cur_Obj.tableInfo.remainingSum;
+
+
+                    cur_Obj.tableInfo.performance_ratio = performance_Ratio;
+                    cur_Obj.tableInfo.remaining_ratio = remaining_Ratio;
+                    cur_Obj.tableInfo.performance_amount = performance_Amount;
+                    cur_Obj.tableInfo.remaining_amount = remaining_Amount;
+                    this.update_Taskobj(cur_Obj);
+                    /*
+                    let summary_info = {
+                        Ratio: {
+                            performance: performance_Ratio,
+                            remaining: remaining_Ratio,
+                        },
+                        Amount: {
+                            performance: performance_Amount,
+                            remaining: remaining_Amount,
+                        },
+                    }
+
+                    return summary_info;
+                    */
+                } else {
+                    alert("calc_summaryInfo Error!");
+                }
             },
 
             update_tableInfo: function () {
                 // table의 각 행정보를 lcoal storag에 update
                 let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
-                CLASS_Obj.table.update_remaningTime(); // remainingui update
+                //CLASS_Obj.table.change_Table_remainingUI(); // remainingui update # 필여없을듯?
                 let isName_overlap = false;
-
 
                 if (curTask_info.is_find === true) {
                     let curTask_obj = curTask_info.task_obj;
@@ -391,8 +448,8 @@ class Task {
                             if (row_idx === curTask_obj.tableInfo.task_detail_lists[row_idx - 1].row_id) {
                                 curTask_obj.tableInfo.task_detail_lists[row_idx - 1].task = table_row__info.task;
                                 curTask_obj.tableInfo.task_detail_lists[row_idx - 1].expected_time = table_row__info.expected_time;
-                                curTask_obj.tableInfo.task_detail_lists[row_idx - 1].performance = table_row__info.performance;
-                                curTask_obj.tableInfo.task_detail_lists[row_idx - 1].remaining = table_row__info.remaining;
+                                //curTask_obj.tableInfo.task_detail_lists[row_idx - 1].performance = table_row__info.performance;
+                                curTask_obj.tableInfo.task_detail_lists[row_idx - 1].remaining = String(parseInt(table_row__info.expected_time) - parseInt(table_row__info.performance));
                                 curTask_obj.tableInfo.task_detail_lists[row_idx - 1].date = table_row__info.date;
                             } else {
                                 alert("Invalid row_id!");
@@ -509,14 +566,14 @@ class Task {
                                 remaining: task_detail_lists[strg_idx].remaining,
                                 date: task_detail_lists[strg_idx].date,
                             };
-                            CLASS_Obj.table.make_tableRow(row_info);
+                            CLASS_Obj.table.make_tableRow(row_info); // table row 생성
                         }
                     }
 
                     load_table_Row(task_name, task_detail_lists); // table의 각 행 load
                     CLASS_Obj.table.change_Table_Sum_UI();
                     CLASS_Obj.summary.change_Table_Summary_UI();
-                    CLASS_Obj.chart.update_chartUI();
+                    CLASS_Obj.chart.change_chartUI();
                 } else {
                     alert("No Task Error!");
                 }
@@ -525,6 +582,7 @@ class Task {
         }
         this.summary = {
             change_Table_Summary_UI: function () { // init func
+                // local storage에 저장된 데이터를 HTML에 반영
                 let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo();
                 CLASS_Obj.Performance_ratio__value_DOM.innerText = curSummary_info.Ratio.performance;
                 CLASS_Obj.Remaining_ratio__value_DOM.innerText = curSummary_info.Ratio.remaining;
@@ -540,25 +598,29 @@ class Task {
             detail_object: {}, // 각각의 Detail Object들의 list
             storage_address: CLASS_Obj.HOME_TASKLIST_Storage,
             sample: "saampE!", // for test
-            update_remaningTime() {
-                let expectedIdx = TASK_TABLE_INDEX["Expected Time"];
-                let perforIdx = TASK_TABLE_INDEX["Performance"];
+
+            change_Table_remainingUI() {
                 let remainIdx = TASK_TABLE_INDEX["Remaining"];
+                let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
+                if (curTask_info.is_find === true) {
+                    for (let row_idx = 0; row_idx < CLASS_Obj.Task_Table__table.rows.length - 1; row_idx++) {
+                        if (row_idx >= 1) { // header 제외
+                            //let detail_taskName=CLASS_Obj.Task_Table__table.rows[row_idx].cells[0].innerText;
+                            let expectedTime = curTask_info.task_obj.tableInfo.task_detail_lists[row_idx - 1].expected_time;
+                            let performaceTime = curTask_info.task_obj.tableInfo.task_detail_lists[row_idx - 1].performance;
 
-                let row_number = CLASS_Obj.Task_Table__table.rows.length;
+                            CLASS_Obj.Task_Table__table.rows[row_idx].cells[remainIdx].innerText = String(expectedTime - performaceTime);
 
-                for (let row_idx = 0; row_idx < row_number - 1; row_idx++) {
-                    if (row_idx >= 1) {  // header 제외
-                        let expectedTime = parseInt(CLASS_Obj.Task_Table__table.rows[row_idx].cells[expectedIdx].innerText);
-                        let performTime = parseInt(CLASS_Obj.Task_Table__table.rows[row_idx].cells[perforIdx].innerText);
-                        CLASS_Obj.Task_Table__table.rows[row_idx].cells[remainIdx].innerText = String(expectedTime - performTime);
-
+                        }
                     }
-
+                } else {
+                    alert("update_Table_Summary Error!");
                 }
-
+                this.change_Table_Sum_UI();
             },
-            change_Table_Sum_UI: function () { // init func
+
+            change_Table_Sum_UI: function () { // init func // **
+                // local storage에 저장된 데이터를 HTML에 반영
                 let curSum_info = CLASS_Obj.task_tool.calc_eachPara_sum();
 
                 CLASS_Obj.Table_tasklist_Sum.innerText = curSum_info.totalTasknum;
@@ -567,7 +629,30 @@ class Task {
                 CLASS_Obj.Table__remaining_Sum_DOM.innerHTML = curSum_info.remainingSum;
 
             },
+            change_Table_performanceUI: function () {
+                // timer end 버튼을 누르면 실행
+                let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
+                if (curTask_info.is_find === true) {
+                    for (let row_idx = 0; row_idx < CLASS_Obj.Task_Table__table.rows.length - 1; row_idx++) {
+                        if (row_idx >= 1) { // header 제외
+                            //let detail_taskName=CLASS_Obj.Task_Table__table.rows[row_idx].cells[0].innerText;
+                            CLASS_Obj.Task_Table__table.rows[row_idx].cells[2].innerText = curTask_info.task_obj.tableInfo.task_detail_lists[row_idx - 1].performance;
 
+                        }
+                    }
+                } else {
+                    alert("update_Table_Summary Error!");
+                }
+                this.change_Table_Sum_UI();
+                //this.update_Table_Sum();
+            },
+
+
+            change_tableUI: function () {
+                this.change_Table_Sum_UI();
+                this.change_Table_remainingUI();
+                this.change_Table_performanceUI();
+            },
             make_tableRow: function (row_info) {
                 let task_name = row_info.task_name;
                 let detail_subtask_name = row_info.detail_subtask_name;
@@ -641,19 +726,16 @@ class Task {
                 // [2]_ Table 수정 금지
                 CLASS_Obj.task_tool.set_table_editable(false);
 
-                // [2]_ 각 행의 칼럼별 정보 update
-                CLASS_Obj.updater.update_tableInfo(); // local storage에 update
-
-                // [3]_ 각 행의 칼럼별 합계 update
-
+                //[3] Update
+                // [1] 변경된 UI를 Local Storage에 반영
+                CLASS_Obj.updater.update_tableInfo();
                 CLASS_Obj.updater.update_Table_Sum();
-                this.change_Table_Sum_UI();
+                CLASS_Obj.updater.update_Summary();
 
-                // [4]_ Summary update
-                let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo();
-                CLASS_Obj.updater.update_Summary(curSummary_info);
+                // [2] TASK_TABLE UI 변경
+                CLASS_Obj.chart.change_chartUI();
+                this.change_tableUI();
                 CLASS_Obj.summary.change_Table_Summary_UI();
-                CLASS_Obj.updater.update_dashboardInfo();
             },
             add_lastrow: function () {
                 let task_clsObj = this.this_class;
@@ -686,12 +768,21 @@ class Task {
                 } else {
                     alert("add_lastrow error!");
                 }
-
+                //old ver
                 // chart_update
-                CLASS_Obj.chart.update_chartUI();
+                //CLASS_Obj.chart.change_chartUI();
 
                 //update table ui
-                CLASS_Obj.table.change_Table_Sum_UI();
+                //CLASS_Obj.table.change_Table_Sum_UI();
+                // [1] 변경된 UI를 Local Storage에 반영
+                CLASS_Obj.updater.update_tableInfo();
+                CLASS_Obj.updater.update_Table_Sum();
+                CLASS_Obj.updater.update_Summary();
+
+                // [2] TASK_TABLE UI 변경
+                CLASS_Obj.chart.change_chartUI();
+                this.change_tableUI();
+                CLASS_Obj.summary.change_Table_Summary_UI();
 
             },
 
@@ -715,12 +806,16 @@ class Task {
                 } else {
                     alert("add_lastrow error!");
                 }
+                // [1] 변경된 UI를 Local Storage에 반영
+                CLASS_Obj.updater.update_tableInfo();
+                CLASS_Obj.updater.update_Table_Sum();
+                CLASS_Obj.updater.update_Summary();
 
-                // chart_update
-                CLASS_Obj.chart.update_chartUI();
+                // [2] TASK_TABLE UI 변경
+                CLASS_Obj.chart.change_chartUI();
+                this.change_tableUI();
+                CLASS_Obj.summary.change_Table_Summary_UI();
 
-                //update table ui
-                CLASS_Obj.table.change_Table_Sum_UI();
             },
 
             change_selected_task: function () {
@@ -816,7 +911,7 @@ class Task {
                 }
                 return today_chartObj;
             },
-            update_chartUI: function () {
+            change_chartUI: function () {
                 let today_chartObj = this.update_chartHistory();
 
                 let task_labels = [];
@@ -845,23 +940,20 @@ class Task {
 
 
     ini_setting() { // class method : initialization 
-        this.loader.load_taskOption(this.HOME_TASKLIST_Storage);
-        this.loader.load_table();
-        this.chart.update_chartUI();
+        this.loader.load_taskOption(this.HOME_TASKLIST_Storage); // task option list 생성
+        this.loader.load_table(); // task table 생성
     }
 }
 
 
 
 function init() {
-    //this.handler.loader.load_taskOption();
-}
-
-function simul() {
+    //초기 실행 
     const TASK = document.querySelector(".Task");
-    test_table = new Task(TASK);
-    test_table.ini_setting();
+    TASK_TABLE = new Task(TASK);
 
+
+    TASK_TABLE.ini_setting();
 }
 
-simul();
+init();
