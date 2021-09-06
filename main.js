@@ -448,7 +448,7 @@ class Dashboard {
                         newCell5.innerText = Home_TaskLists[idx].dash_boardInfo.remain_perday;
 
                         // table 수정 가능 속성
-                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "center");
+                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "left");
                     }
                 }
 
@@ -544,13 +544,15 @@ class Dashboard {
                             tr.classList.add("home_scedule__daylists");
                             let td = document.createElement('td');
                             if (col_idx === 0) {
-                                td.innerText = "Task";
+                                td.innerText = "Task Name";
+                                td.style = "word-wrap";
                             } else {
                                 td.innerText = String(col_idx);
+                                td.style.width = SCHEDULE_CELL_WIDTH;
                             }
 
                             td.classList.add("header" + String(col_idx));
-                            td.style.width = SCHEDULE_CELL_WIDTH;
+
                             td.style.textAlign = "center";
                             td.style.fontWeight = "bold";
                             tr.appendChild(td);
@@ -560,13 +562,15 @@ class Dashboard {
                             let td = document.createElement('td');
                             if (col_idx === 0) {
                                 td.innerText = taskname;
+                                td.style = "word-wrap";
                             } else {
                                 td.innerText = ".";
                                 td.style.textAlign = "center";
+                                td.style.width = SCHEDULE_CELL_WIDTH;
                             }
 
                             td.classList.add(taskname + "_D" + String(col_idx));
-                            td.style.width = SCHEDULE_CELL_WIDTH;
+
                             tr.appendChild(td);
                         }
                     }
@@ -790,6 +794,8 @@ class Dashboard {
             const newRow = this.home_dashboard__table_DOM.insertRow(this.home_dashboard__table_DOM.rows.length);
 
             const newCell0 = newRow.insertCell(0);
+
+            newCell0.style.textAlign = "left";
             newCell0.innerText = 'task' + String(this.home_dashboard__table_DOM.rows.length - 2);
             const newCell1 = newRow.insertCell(1);
             newCell1.innerText = "";

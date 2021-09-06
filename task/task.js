@@ -507,6 +507,7 @@ class Task {
 
                     cur_Obj.dash_boardInfo.progress = cur_Obj.tableInfo.performance_ratio;
                     cur_Obj.dash_boardInfo.remain_total = cur_Obj.tableInfo.remainingSum;
+
                     if (cur_Obj.dash_boardInfo.due_date !== undefined && cur_Obj.dash_boardInfo.due_date !== "") {
                         cur_Obj.dash_boardInfo.remain_day = calc_remainDay(cur_Obj.dash_boardInfo.due_date);
                         cur_Obj.dash_boardInfo.remain_perday = Math.floor(cur_Obj.tableInfo.remainingSum / calc_remainDay(cur_Obj.dash_boardInfo.due_date));
