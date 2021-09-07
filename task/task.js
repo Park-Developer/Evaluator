@@ -161,10 +161,12 @@ class Task {
 
                 // exception case : remaining은 수정 불가
                 let remaining_idx = TASK_TABLE_INDEX["Remaining"];
+                let perform_idx = TASK_TABLE_INDEX["Performance"];
+
 
                 for (let i = 0; i < row_num; i++) {
                     for (let j = 0; j < cell_num; j++) {
-                        if (j !== remaining_idx) {
+                        if (j !== remaining_idx && j !== perform_idx) {
                             CLASS_Obj.Task_Table__table.rows[i].cells[j].setAttribute("contenteditable", editable);
                         }
 
@@ -696,7 +698,7 @@ class Task {
                 newCell5.appendChild(timer.Timer_display_DOM);
                 // table 수정 가능 속성
 
-                CLASS_Obj.task_tool.set_row_property(newRow, false, "center");
+                CLASS_Obj.task_tool.set_row_property(newRow, false, "left");
 
             },
             reset_current_table: function () {
