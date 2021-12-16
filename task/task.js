@@ -67,7 +67,7 @@ class Task {
 
         this.Task_Home_Btn.addEventListener("click", () => {
 
-            location.href = "../main.html";
+            location.href = "../index.html";
 
         });
 
