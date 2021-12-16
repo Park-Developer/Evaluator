@@ -11,18 +11,28 @@ class Home {
         this.home_Button.addEventListener("click", () => {
             // task list 존재 유무 확인
             let timer_storage = JSON.parse(localStorage.getItem(this.Home_taskList_Storage));
-            if (timer_storage.length > 0) {
-                if (this.is_home == true) {
+            
+            if (timer_storage==null){ // localstorage에 Home_task_list가 없는 경우 or 완전 초기 상태
+                alert("No Task! ? _ ? ");
+                localStorage.setItem(this.Home_taskList_Storage, JSON.stringify([]));
+
+
+            }else{
+                if (timer_storage.length > 0) {
+                    if (this.is_home == true) {
+                    } else {
+                        this.is_home = true;
+                    }
+                    location.href = "./task/task.html";
                 } else {
-                    this.is_home = true;
+                    alert("No Task!");
+                    /*
+                    ############## Needed to to! ###############
+                    */
                 }
-                location.href = "./task/task.html";
-            } else {
-                alert("No Task!");
-                /*
-                ############## Needed to to! ###############
-                */
             }
+
+
         });
 
     }
