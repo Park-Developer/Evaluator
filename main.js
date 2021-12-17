@@ -16,8 +16,8 @@ class Home {
                 alert("No Task! ? _ ? ");
                 localStorage.setItem(this.Home_taskList_Storage, JSON.stringify([]));
 
-
             }else{
+
                 if (timer_storage.length > 0) {
                     if (this.is_home == true) {
                     } else {
@@ -248,10 +248,26 @@ class Dashboard {
         // Button Event Setting
         this.dashTable_AddBtn_DOM.addEventListener("click", () => {
             this.add_dashTable_row();
+            
             DASH_BOARD.updater.update_dashboardInfo();
+
+            // 2021-12-17 수정
+            DASH_BOARD.Schedule.reset_schedule_table();
+            DASH_BOARD.dash_tool.reset_tasklist_table();
+
+            DASH_BOARD.loader.load_localstorage_to_Home();
+            
         });
         this.dashTable_RemoveBtn_DOM.addEventListener("click", () => {
             this.remove_dashTable_row();
+
+            DASH_BOARD.updater.update_dashboardInfo();
+
+            // 2021-12-17 수정
+            DASH_BOARD.Schedule.reset_schedule_table();
+            DASH_BOARD.dash_tool.reset_tasklist_table();
+
+            DASH_BOARD.loader.load_localstorage_to_Home();
         });
 
         this.dashTable_ChangeBtn_DOM.addEventListener("click", () => {
@@ -288,6 +304,16 @@ class Dashboard {
 
 
         this.dash_tool = {
+            reset_tasklist_table:function(){
+                while(true){
+                    if (DASH_BOARD.home_dashboard__table_DOM.rows.length >2){
+                        DASH_BOARD.home_dashboard__table_DOM.deleteRow(DASH_BOARD.home_dashboard__table_DOM.rows.length-1);
+                    }else{
+                        break;
+                    }
+                }
+            },
+            
             set_table_editable: function (editable) {
                 let row_num = DASH_BOARD.home_dashboard__table_DOM.rows.length;
                 let cell_num = DASH_BOARD.home_dashboard__table_DOM.rows[0].cells.length;
@@ -463,7 +489,7 @@ class Dashboard {
                 }
 
                 // table color load
-                DASH_BOARD.Schedule.make_schedule_table();
+                DASH_BOARD.Schedule.make_schedule_table(); // 없는 상태에서 schedule을 만듬
                 DASH_BOARD.Schedule.change_scheduleUI();
             },
         }
@@ -524,7 +550,25 @@ class Dashboard {
                 }
                 return result;
             },
+            reset_schedule_table:function(){
+                
+                /*
+                Schedule Table의 모든 행 삭제
+                
+                */
+                while(true){
+                    if (DASH_BOARD.home_schedule__table.rows.length>0){
+                        DASH_BOARD.home_schedule__table.deleteRow(DASH_BOARD.home_schedule__table.rows.length-1 )
+                    }else{
+                        break;
+                    }
+                }
+               
+            },
             make_schedule_table: function () {
+                /*
+                아무것도 없는 상태에서 Schedule Table 생성
+                */
                 function make_header(month, daysin_month) {    // Table Header Setting
                     let header_tr = document.createElement('tr');
                     let header_td = document.createElement('td');
@@ -541,8 +585,10 @@ class Dashboard {
                 let header_tr = make_header(month_info.month, month_info.daysInMonth);
 
                 DASH_BOARD.home_schedule__table.appendChild(header_tr);
+                
                 let Hometask_lists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
                 let Task_numbers = Hometask_lists.length;
+
                 for (let row_idx = 0; row_idx < Task_numbers + 1; row_idx++) {
                     //[1] Row Setting
                     let tr = document.createElement('tr');
