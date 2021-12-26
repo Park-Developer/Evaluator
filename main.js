@@ -321,8 +321,11 @@ class Dashboard {
                 // 수정가능 항목 : 1. Task Name, 2: Due Date
                 let taskname_idx = Dash_TABLE_INDEX["Task Name"];
                 let duedate_idx = Dash_TABLE_INDEX["Due Date"];
-
-                for (let i = 0; i < row_num; i++) {
+                
+                // 수정 가능 제외 대상
+                // - Header
+                // - taskname, duedate를 제외한 나머지
+                for (let i = 2; i < row_num; i++) {
                     for (let j = 0; j < cell_num; j++) {
                         if (j === taskname_idx || j === duedate_idx) {
                             DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[j].setAttribute("contenteditable", editable);
@@ -465,26 +468,57 @@ class Dashboard {
             load_localstorage_to_Home: function () {
                 let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
                 let home_data_num = Home_TaskLists.length;
-
+        
                 if (Home_TaskLists !== null) {
                     for (let idx = 0; idx < home_data_num; idx++) {
                         const newRow = DASH_BOARD.home_dashboard__table_DOM.insertRow(DASH_BOARD.home_dashboard__table_DOM.rows.length);
 
                         const newCell0 = newRow.insertCell(0); // 'task';
                         newCell0.innerText = Home_TaskLists[idx].dash_boardInfo.task_name;
+
                         const newCell1 = newRow.insertCell(1); // "due date";
                         newCell1.innerText = Home_TaskLists[idx].dash_boardInfo.due_date;
+                        
                         const newCell2 = newRow.insertCell(2); // "remain date"
-                        newCell2.innerText = Home_TaskLists[idx].dash_boardInfo.remain_day;
+
+                        if (Home_TaskLists[idx].dash_boardInfo.due_date!="") // due date 설정이 된 경우
+                        {
+                            const setDate = new Date(Home_TaskLists[idx].dash_boardInfo.due_date);
+                        
+                            // D-day 날짜의 연,월,일 구하기
+                            const setDateDay = setDate.getDate();
+    
+                            // 현재 날짜를 new 연산자를 사용해서 Date 객체를 생성
+                            const now = new Date();
+    
+                            // D-Day 날짜에서 현재 날짜의 차이를 getTime 메서드를 사용해서 밀리초의 값으로 가져온다. 
+                            const distance = setDate.getTime() - now.getTime();
+                            
+                            // Math.floor 함수를 이용해서 근접한 정수값을 가져온다.
+                            // 밀리초 값이기 때문에 1000을 곱한다. 
+                            // 1000*60 => 60초(1분)*6SDZXSXSSSXD0 => 60분(1시간)*24 = 24시간(하루)
+                            // 나머지 연산자(%)를 이용해서 시/분/초를 구한다.
+                            //const day = Math.floor(distance/(1000*60*60*24));
+                            var d_day=Math.floor(distance/(1000*60*60*24));
+    
+                            if (d_day>=0){
+                                newCell2.innerText="D-"+String(d_day);
+                            }else{
+                                newCell2.innerText="D+"+String(d_day);
+                            }
+                        }
+
                         const newCell3 = newRow.insertCell(3); // progress
                         newCell3.innerText = Home_TaskLists[idx].dash_boardInfo.progress;
+                        
                         const newCell4 = newRow.insertCell(4); // remain total
                         newCell4.innerText = Home_TaskLists[idx].dash_boardInfo.remain_total;
+                        
                         const newCell5 = newRow.insertCell(5); // remain perday
                         newCell5.innerText = Home_TaskLists[idx].dash_boardInfo.remain_perday;
 
                         // table 수정 가능 속성
-                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "left");
+                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "center");
                     }
                 }
 

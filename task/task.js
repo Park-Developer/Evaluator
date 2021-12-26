@@ -666,21 +666,31 @@ class Task {
 
                 let row_index = CLASS_Obj.Task_Table__table.rows.length - 1;
                 const newRow = CLASS_Obj.Task_Table__table.insertRow(row_index);
+                
+                // Cell0 Setting :
                 const newCell0 = newRow.insertCell(0); // task name
                 newCell0.innerText = detail_subtask_name;
+                
+
                 const newCell1 = newRow.insertCell(1); // expected time
                 newCell1.innerText = expected_time;
+                 
 
                 const newCell2 = newRow.insertCell(2); // performance
                 newCell2.innerText = performance;
-
+                
+                
                 const newCell3 = newRow.insertCell(3); // remaining
                 newCell3.innerText = remaining;
+                
 
                 const newCell4 = newRow.insertCell(4); // date
                 newCell4.innerText = date;
+                
 
                 const newCell5 = newRow.insertCell(5); //
+                
+
                 let timer_info = {
                     task_name: task_name,
                     detail_subtask_name: detail_subtask_name,
@@ -696,9 +706,9 @@ class Task {
                 newCell5.appendChild(timer.Timer_Start_button_DOM);
                 newCell5.appendChild(timer.Timer_End_button_DOM);
                 newCell5.appendChild(timer.Timer_display_DOM);
-                // table 수정 가능 속성
-
-                CLASS_Obj.task_tool.set_row_property(newRow, false, "left");
+                
+                // table 수정 가능 + text 배열 속성
+                CLASS_Obj.task_tool.set_row_property(newRow, false, "center");
 
             },
             reset_current_table: function () {
