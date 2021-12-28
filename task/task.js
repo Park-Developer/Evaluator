@@ -297,27 +297,21 @@ class Task {
                 }
                 return result;
             },
-            calc_summaryInfo: function () {
+            calc_summaryInfo: function (sum_data) {
                 // local storage에 저장되어 있는 정보를 기준으로 계싼
                 let curObjInfo = this.get_CurrentTaskobj();
-                let excuted_taskNum;
                 let cur_Obj;
-                let task_detail_lists;
+           
 
                 if (curObjInfo.is_find === true) {
                     cur_Obj = curObjInfo.task_obj;
-                    task_detail_lists = cur_Obj.tableInfo.task_detail_lists;
-                    excuted_taskNum = 0
-                    for (let i = 0; i < task_detail_lists.length; i++) {
-                        let detail_obj = task_detail_lists[i];
-                        if (parseInt(detail_obj.performance) !== 0) {
-                            excuted_taskNum += 1;
-                        }
-                    }
-                    let total_taskNum = task_detail_lists.length;
-                    let performance_Ratio = String((100 * excuted_taskNum / total_taskNum).toFixed(2)) + "%";
+          
+         
+                    let performance_Ratio = String((100 * sum_data.performanceSum /sum_data.expectedSum).toFixed(2)) + "%";
+
+                    
                     let performance_Amount = cur_Obj.tableInfo.performanceSum;
-                    let remaining_Ratio = String((100 * (1 - excuted_taskNum / total_taskNum)).toFixed(2)) + "%";
+                    let remaining_Ratio = String((100 * (1 - sum_data.performanceSum /sum_data.expectedSum)).toFixed(2)) + "%";
                     let remaining_Amount = cur_Obj.tableInfo.remainingSum;
 
                     let summary_info = {
@@ -369,24 +363,8 @@ class Task {
             },
 
             update_Summary: function () {
-                // old Ver
-                /*
-                let curTask_info = CLASS_Obj.task_tool.get_CurrentTaskobj();
-                if (curTask_info.is_find === true) {
-                    let curTask_obj = curTask_info.task_obj;
-                    curTask_obj.tableInfo.performance_ratio = curSummary_info.Ratio.performance;
-                    curTask_obj.tableInfo.remaining_ratio = curSummary_info.Ratio.remaining;
-                    curTask_obj.tableInfo.performance_amount = curSummary_info.Amount.performance;
-                    curTask_obj.tableInfo.remaining_amount = curSummary_info.Amount.remaining;
-
-                    this.update_Taskobj(curTask_obj);
-
-                } else {
-                    alert("update_Table_Summary Error!");
-                }
-                */
                 // New Ver
-                // local storage에 저장되어 있는 정보를 기준으로 계싼
+                // local storage에 저장되어 있는 정보를 기준으로 계산
                 this.update_Table_Sum();
 
                 let curObjInfo = CLASS_Obj.task_tool.get_CurrentTaskobj();
@@ -396,40 +374,21 @@ class Task {
 
                 if (curObjInfo.is_find === true) {
                     cur_Obj = curObjInfo.task_obj;
-                    task_detail_lists = cur_Obj.tableInfo.task_detail_lists;
-                    excuted_taskNum = 0
-                    for (let i = 0; i < task_detail_lists.length; i++) {
-                        let detail_obj = task_detail_lists[i];
-                        if (parseInt(detail_obj.performance) !== 0) {
-                            excuted_taskNum += 1;
-                        }
-                    }
-                    let total_taskNum = task_detail_lists.length;
-                    let performance_Ratio = String((100 * excuted_taskNum / total_taskNum).toFixed(2)) + "%";
-                    let performance_Amount = cur_Obj.tableInfo.performanceSum;
-                    let remaining_Ratio = String((100 * (1 - excuted_taskNum / total_taskNum)).toFixed(2)) + "%";
-                    let remaining_Amount = cur_Obj.tableInfo.remainingSum;
+                    let sum_data=CLASS_Obj.task_tool.calc_eachPara_sum();
+                    let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo(sum_data); 
 
+                    // tableInfo Update : task.html 내 계산용
+                    cur_Obj.tableInfo.performance_ratio = curSummary_info.Ratio.performance;
+                    cur_Obj.tableInfo.remaining_ratio = curSummary_info.Ratio.remaining;
+                    cur_Obj.tableInfo.performance_amount = curSummary_info.Amount.performance;
+                    cur_Obj.tableInfo.remaining_amount = curSummary_info.Amount.remaining;
 
-                    cur_Obj.tableInfo.performance_ratio = performance_Ratio;
-                    cur_Obj.tableInfo.remaining_ratio = remaining_Ratio;
-                    cur_Obj.tableInfo.performance_amount = performance_Amount;
-                    cur_Obj.tableInfo.remaining_amount = remaining_Amount;
+                    // dash_boardInfo Update : main.html과의 통신용
+                    cur_Obj.dash_boardInfo.progress = curSummary_info.Ratio.performance;
+                    cur_Obj.dash_boardInfo.remain_total = curSummary_info.Amount.remaining;
+
                     this.update_Taskobj(cur_Obj);
-                    /*
-                    let summary_info = {
-                        Ratio: {
-                            performance: performance_Ratio,
-                            remaining: remaining_Ratio,
-                        },
-                        Amount: {
-                            performance: performance_Amount,
-                            remaining: remaining_Amount,
-                        },
-                    }
-
-                    return summary_info;
-                    */
+          
                 } else {
                     alert("calc_summaryInfo Error!");
                 }
@@ -586,7 +545,9 @@ class Task {
         this.summary = {
             change_Table_Summary_UI: function () { // init func
                 // local storage에 저장된 데이터를 HTML에 반영
-                let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo();
+                let sum_data=CLASS_Obj.task_tool.calc_eachPara_sum();
+                let curSummary_info = CLASS_Obj.task_tool.calc_summaryInfo(sum_data); 
+                
                 CLASS_Obj.Performance_ratio__value_DOM.innerText = curSummary_info.Ratio.performance;
                 CLASS_Obj.Remaining_ratio__value_DOM.innerText = curSummary_info.Ratio.remaining;
                 CLASS_Obj.Performance_amount__value_DOM.innerText = curSummary_info.Amount.performance;
