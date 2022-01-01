@@ -155,7 +155,7 @@ class Home {
                                 result_Object[dateObjName] = tempObj;
                             }
                         }
-                        //
+                        
                     }
                 }
             }
@@ -218,6 +218,10 @@ class Dashboard {
                 max: 25
             },
         };
+        const DASHBOARD_LIMITATIONS={
+            Taskname_length:12,
+        };
+
         const SCHEDULE_COLOR = {
             Level5: "#0E6251",
             Level4: "#148F77",
@@ -291,13 +295,18 @@ class Dashboard {
             //[2] Table 수정 허용
             DASH_BOARD.dash_tool.set_table_editable(false); // 수정 금지
             let isName_overlap = DASH_BOARD.dash_tool.check_taskName();
-            if (isName_overlap === false) {
+
+            if (isName_overlap === true) {
                 DASH_BOARD.updater.update_dashboardInfo();
             } else {
                 alert("overlaped name error!");
             }
 
+            // [3] Schedule Table Update
+            DASH_BOARD.Schedule.reset_schedule_table();
+            DASH_BOARD.Schedule.make_schedule_table();
 
+            DASH_BOARD.Schedule.change_scheduleUI(); // localstorage에서 데이터 불러오기
 
         });
 
@@ -336,20 +345,40 @@ class Dashboard {
 
             },
             check_taskName: function () {
-                // 동일한 task name이 있는지 확인
+                // (1) Table 내 동일한 task name이 있는지 확인
+                // (2) 10글자를 넘는 Task name이 있는지 확인
                 let Home_TaskLists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
                 let row_num = DASH_BOARD.home_dashboard__table_DOM.rows.length;
                 let taskname_idx = Dash_TABLE_INDEX["Task Name"];
-                let name_list = [];
+                let name_list = []; // taskname 체크용 array
                 let taskname;
-                let result = false;
+                let result =true;
 
                 for (let i = 0; i < row_num; i++) {
                     if (i >= 2) { // header  제외
-                        taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[taskname_idx].innerText.trim();
+                        taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[taskname_idx].innerText.trim(); // 공백제거
+
+                        taskname=taskname.replace(/\n/g,'');// 개행제거
+                        taskname = DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[taskname_idx].innerText=taskname;
+
+
+                        // (1) task name 길이 확인
+                        if (taskname.length>DASHBOARD_LIMITATIONS.Taskname_length){
+                            while(true){
+                                let taskname_retry = prompt("Task name can't exceed "+String(DASHBOARD_LIMITATIONS.Taskname_length) +"characters");
+                                
+                                if (taskname_retry.length<DASHBOARD_LIMITATIONS.Taskname_length){
+                                    DASH_BOARD.home_dashboard__table_DOM.rows[i].cells[taskname_idx].innerText=taskname_retry; 
+                                    break;
+                                }
+                            }
+                            
+                        }
+
+                        // (2) 테이블 내 동일한 이름 확인
                         if (name_list.indexOf(taskname) !== -1) {
                             // 이미 리스트에 존재하는 경우
-                            result = true;
+                            result =false;
 
                             // local storage에 저장된 값으로 원복
                             for (let row_idx = 0; row_idx < DASH_BOARD.home_dashboard__table_DOM.rows.length - 1; row_idx++) {
@@ -367,13 +396,21 @@ class Dashboard {
 
 
                 }
+
+                
+
                 return result;
             },
-            set_row_property: function (row, editable, text_align) {
+            set_row_property: function (row, editable, text_align,excpt) {
                 let cell_number = row.cells.length;
                 for (let i = 0; i < cell_number; i++) {
                     row.cells[i].setAttribute("contenteditable", editable);
                     row.cells[i].style.textAlign = text_align;
+                }
+                
+                if (excpt===true){
+                    // row property 예외 속성 지정
+                    row.cells[0].style.textAlign = "left";
                 }
             },
 
@@ -471,6 +508,8 @@ class Dashboard {
         
                 if (Home_TaskLists !== null) {
                     for (let idx = 0; idx < home_data_num; idx++) {
+                        let d_day=0; // due date - current date
+
                         const newRow = DASH_BOARD.home_dashboard__table_DOM.insertRow(DASH_BOARD.home_dashboard__table_DOM.rows.length);
 
                         const newCell0 = newRow.insertCell(0); // 'task';
@@ -499,13 +538,18 @@ class Dashboard {
                             // 1000*60 => 60초(1분)*6SDZXSXSSSXD0 => 60분(1시간)*24 = 24시간(하루)
                             // 나머지 연산자(%)를 이용해서 시/분/초를 구한다.
                             //const day = Math.floor(distance/(1000*60*60*24));
-                            var d_day=Math.floor(distance/(1000*60*60*24));
-    
-                            if (d_day>=0){
-                                newCell2.innerText="D-"+String(d_day);
-                            }else{
-                                newCell2.innerText="D+"+String(d_day);
+                            d_day=Math.floor(Math.abs(distance/(1000*60*60*24)));
+                            
+                            if (d_day==0){
+                                newCell2.innerText="D-Day";
+                            }else{                         
+                                if (distance>=0){
+                                    newCell2.innerText="D-"+String(d_day);
+                                }else{
+                                    newCell2.innerText="D+"+String(d_day);
+                                }
                             }
+
                         }
 
                         const newCell3 = newRow.insertCell(3); // progress
@@ -515,10 +559,18 @@ class Dashboard {
                         newCell4.innerText = Home_TaskLists[idx].dash_boardInfo.remain_total;
                         
                         const newCell5 = newRow.insertCell(5); // remain perday
-                        newCell5.innerText = Home_TaskLists[idx].dash_boardInfo.remain_perday;
+                        if (d_day<=0){
+                            newCell5.innerText = parseInt(parseInt(newCell4.innerText));
+                        }else{
+                            newCell5.innerText = parseInt(parseInt(newCell4.innerText)/d_day);
+                        }
+                        
 
                         // table 수정 가능 속성
-                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "center");
+                        DASH_BOARD.dash_tool.set_row_property(newRow, false, "center",true);
+             
+                        
+
                     }
                 }
 
@@ -612,6 +664,7 @@ class Dashboard {
                     header_td.colSpan = String(daysin_month + 1);
                     header_td.style.textAlign = "center";
                     header_td.style.fontWeight = "bold";
+                  
                     return header_tr;
                 }
 
@@ -638,7 +691,8 @@ class Dashboard {
                                 td.style = "word-wrap";
                             } else {
                                 td.innerText = String(col_idx);
-                                td.style.width = SCHEDULE_CELL_WIDTH;
+                                //td.style.width ="10%";// SCHEDULE_CELL_WIDTH;
+                                td.classList.add("work_display");
                             }
 
                             td.classList.add("header" + String(col_idx));
@@ -650,13 +704,15 @@ class Dashboard {
                             let taskname = Hometask_lists[row_idx - 1].dash_boardInfo.task_name;
                             tr.classList.add(taskname);
                             let td = document.createElement('td');
+                           
                             if (col_idx === 0) {
                                 td.innerText = taskname;
                                 td.style = "word-wrap";
                             } else {
                                 td.innerText = ".";
                                 td.style.textAlign = "center";
-                                td.style.width = SCHEDULE_CELL_WIDTH;
+                                //td.style.width ="10%";// SCHEDULE_CELL_WIDTH;
+                                td.classList.add("work_display");
                             }
 
                             td.classList.add(taskname + "_D" + String(col_idx));
@@ -667,8 +723,12 @@ class Dashboard {
 
                     //[3] Add row
                     DASH_BOARD.home_schedule__table.appendChild(tr);
+                    
                 }
+
+         
             },
+
             change_taskColorUI: function (task_name) {
                 let today = new Date();
                 let this__month = today.getMonth() + 1;//Get the month as a number (0-11)
@@ -706,6 +766,7 @@ class Dashboard {
                     let task_name = Home_TaskLists[i].dash_boardInfo.task_name;
                     this.change_taskColorUI(task_name);
                 }
+              
             }
         }
         this.chart = {
@@ -951,7 +1012,6 @@ function init() {
 
     const dashboard = new Dashboard();
     dashboard.loader.load_localstorage_to_Home();
-    dashboard.updater.update_dashboardInfo();
 
     dashboard.chart.render_chart();
 

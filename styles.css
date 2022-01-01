@@ -22,11 +22,25 @@
     margin-top:var(--navigation_margin_top);
      
 }
+
 .home_dashboard__table{
     margin-top:var(--home_table_margin_top);
     margin-right:var( --home_table_distance);
     table-layout: auto;
+    white-space: nowrap;
+    border-collapse: collapse;  
+    border: 1px solid white;
 }
+.home_dashboard__table th{ /*자식속성 지정*/
+    border-collapse: collapse;  
+    border: 1px solid white;
+}
+
+.home_dashboard__table td{ /*자식속성 지정*/
+    border-collapse: collapse;  
+    border: 1px solid white;
+}
+
 .home_dashboard__title{
     color:var(--dashboard_table_title_color);
     font-weight: bold;
@@ -52,6 +66,9 @@
     border-collapse: separate;
     border-spacing:5px;
     font-weight: bold;
+    white-space: nowrap;
+
+    table-layout: fixed;
 }
 .home_schedule__header{
     background-color: var(--schedule_table_header_color);
@@ -68,6 +85,9 @@
     margin-top: var(--schedule_statistics_margin_top);
 }
 
+.work_display{
+    width:10px;
+}
 
 /* [Main Chart]*/
 .month_statistics_chart{

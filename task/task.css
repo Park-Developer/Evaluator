@@ -7,7 +7,7 @@
 }
 
 .Task_Table__table{
-    table-layout: fixed;
+    table-layout: auto;
 }
 .Task_Table__header{
     background-color: var(--task_table_header_color);
