@@ -62,14 +62,37 @@
     margin-top:var(--navigation_margin_top);
 }
 .home_schedule__table{
+    width:90%;
+    table-layout: fixed;
     margin-top:var(--home_table_margin_top);
     border-collapse: separate;
     border-spacing:5px;
     font-weight: bold;
+    
     white-space: nowrap;
-
-    table-layout: fixed;
+  
 }
+/*--------------------------------------*/
+.header_name_td{ /*header에 월 표시*/
+    text-align: center;
+    font-weight: bold;
+    width:20%;
+}
+
+.header_days_td{ /*header에 날짜 표시*/
+    text-align: center;
+    font-weight: bold;
+
+}
+/*--------------------------------------*/
+.taskname_display{
+font-size: 8px;
+}
+
+.work_display{
+    font-size: 8px;
+}
+/*--------------------------------------*/
 .home_schedule__header{
     background-color: var(--schedule_table_header_color);
 }
@@ -83,10 +106,6 @@
 /*  [Schedule_statistics]  */
 .home_schedule_statistics{
     margin-top: var(--schedule_statistics_margin_top);
-}
-
-.work_display{
-    width:10px;
 }
 
 /* [Main Chart]*/

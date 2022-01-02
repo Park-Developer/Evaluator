@@ -657,21 +657,32 @@ class Dashboard {
                 */
                 function make_header(month, daysin_month) {    // Table Header Setting
                     let header_tr = document.createElement('tr');
-                    let header_td = document.createElement('td');
+                    let header_name_td = document.createElement('td');
+                    let header_days_td=document.createElement('td');
+
+                    header_name_td.classList.add("header_name_td");
+                    header_days_td.classList.add("header_days_td");
+
                     header_tr.classList.add("home_schedule__header");
-                    header_tr.appendChild(header_td);
-                    header_td.innerText = String(month) + "月";
-                    header_td.colSpan = String(daysin_month + 1);
-                    header_td.style.textAlign = "center";
-                    header_td.style.fontWeight = "bold";
-                  
-                    return header_tr;
+                    header_tr.appendChild(header_name_td);
+                    header_tr.appendChild(header_days_td);
+
+                    header_name_td.innerText = String(month) + "月";
+           
+                    header_days_td.innerText = "Days";
+                    header_days_td.colSpan = String(daysin_month);
+                    
+                    return [header_tr,header_name_td,header_days_td];
                 }
 
                 let month_info = this.get_thisMonth_info();
-                let header_tr = make_header(month_info.month, month_info.daysInMonth);
+                let header_obj = make_header(month_info.month, month_info.daysInMonth);
+                
+                let header_tr=header_obj[0];
+                let header_name_td=header_obj[1];
+                let header_days_td=header_obj[2];
 
-                DASH_BOARD.home_schedule__table.appendChild(header_tr);
+                DASH_BOARD.home_schedule__table.appendChild(header_tr); // Header행 추가
                 
                 let Hometask_lists = JSON.parse(localStorage.getItem(DASH_BOARD.localstoraged_taskinfo));
                 let Task_numbers = Hometask_lists.length;
@@ -687,18 +698,18 @@ class Dashboard {
                             tr.classList.add("home_scedule__daylists");
                             let td = document.createElement('td');
                             if (col_idx === 0) {
+                                td.classList.add("taskname_display");
                                 td.innerText = "Task Name";
-                                td.style = "word-wrap";
                             } else {
-                                td.innerText = String(col_idx);
-                                //td.style.width ="10%";// SCHEDULE_CELL_WIDTH;
                                 td.classList.add("work_display");
+                                td.innerText = String(col_idx);
                             }
 
                             td.classList.add("header" + String(col_idx));
 
                             td.style.textAlign = "center";
                             td.style.fontWeight = "bold";
+                 
                             tr.appendChild(td);
                         } else { // header행이 아닌경우
                             let taskname = Hometask_lists[row_idx - 1].dash_boardInfo.task_name;
@@ -711,7 +722,7 @@ class Dashboard {
                             } else {
                                 td.innerText = ".";
                                 td.style.textAlign = "center";
-                                //td.style.width ="10%";// SCHEDULE_CELL_WIDTH;
+         
                                 td.classList.add("work_display");
                             }
 
